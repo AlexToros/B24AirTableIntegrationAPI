@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "B24AirTableIntegration", "B24AirTableIntegration\B24AirTableIntegration.csproj", "{D60C710F-4B0B-4752-9BAC-60D2398BE893}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "B24AirTableIntegration.Tests", "B24AirTableIntegration.Tests\B24AirTableIntegration.Tests.csproj", "{E2673B59-5351-480C-BB6B-8A39C488DD52}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D60C710F-4B0B-4752-9BAC-60D2398BE893}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D60C710F-4B0B-4752-9BAC-60D2398BE893}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D60C710F-4B0B-4752-9BAC-60D2398BE893}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D60C710F-4B0B-4752-9BAC-60D2398BE893}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2673B59-5351-480C-BB6B-8A39C488DD52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2673B59-5351-480C-BB6B-8A39C488DD52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2673B59-5351-480C-BB6B-8A39C488DD52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2673B59-5351-480C-BB6B-8A39C488DD52}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {79B77F21-9038-439B-BEB9-7CE28E5F02A0}
+	EndGlobalSection
+EndGlobal
