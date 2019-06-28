@@ -11,11 +11,11 @@ namespace B24AirTableIntegration.App_Code.Helpers
 {
     public class ApiClient
     {
-        public string RootUrl { get; set; }
-        public Dictionary<string, string> Headers { get; set; }
-        public Dictionary<string, string> PermanentParams { get; set; }
+        private string RootUrl { get; set; }
+        private Dictionary<string, string> Headers { get; set; }
+        private Dictionary<string, string> PermanentParams { get; set; }
 
-        public ApiClient(string RootUrl, Dictionary<string, string> Headers, Dictionary<string, string> PermanentParams = null)
+        protected ApiClient(string RootUrl, Dictionary<string, string> Headers, Dictionary<string, string> PermanentParams = null)
         {
             ServicePointManager.Expect100Continue = true;
             if (PermanentParams != null)
@@ -31,8 +31,12 @@ namespace B24AirTableIntegration.App_Code.Helpers
             this.Headers.Add("Content-Type", "application/json");
             this.RootUrl = RootUrl;
         }
+        protected T Get<T>(string EndPoint, Dictionary<string, string> parameters = null)
+        {
+            return JsonConvert.DeserializeObject<T>(Get(EndPoint, parameters));
+        }
 
-        public string Get(string EndPoint, Dictionary<string, string> parameters = null)
+        protected string Get(string EndPoint, Dictionary<string, string> parameters = null)
         {
 
             string url = $"{Path.Combine(RootUrl, EndPoint).Trim('/')}?{GetTotalParamString(parameters)}".Trim('?');
@@ -45,32 +49,32 @@ namespace B24AirTableIntegration.App_Code.Helpers
             return result;
         }
 
-        public string Put<T>(string EndPoint, T content, Dictionary<string, string> parameters = null)
+        protected string Put<T>(string EndPoint, T content, Dictionary<string, string> parameters = null)
         {
             return Put(EndPoint, JsonConvert.SerializeObject(content), parameters);
         }
 
-        public string Put(string EndPoint, string content, Dictionary<string, string> parameters = null)
+        protected string Put(string EndPoint, string content, Dictionary<string, string> parameters = null)
         {
             return UploadContent(EndPoint, content, parameters, "PUT");
         }
 
-        public string Patch<T>(string EndPoint, T content, Dictionary<string, string> parameters = null)
+        protected string Patch<T>(string EndPoint, T content, Dictionary<string, string> parameters = null)
         {
             return Patch(EndPoint, JsonConvert.SerializeObject(content), parameters);
         }
 
-        public string Patch(string EndPoint, string content, Dictionary<string, string> parameters = null)
+        protected string Patch(string EndPoint, string content, Dictionary<string, string> parameters = null)
         {
             return UploadContent(EndPoint, content, parameters, "PATCH");
         }
 
-        public string Post<T>(string EndPoint, T content, Dictionary<string, string> parameters = null)
+        protected string Post<T>(string EndPoint, T content, Dictionary<string, string> parameters = null)
         {
             return Post(EndPoint, JsonConvert.SerializeObject(content), parameters);
         }
 
-        public string Post(string EndPoint, string content, Dictionary<string, string> parameters = null)
+        protected string Post(string EndPoint, string content, Dictionary<string, string> parameters = null)
         {
             return UploadContent(EndPoint, content, parameters);
         }

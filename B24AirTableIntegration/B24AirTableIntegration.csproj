@@ -129,7 +129,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Code\Helpers\ApiClient.cs" />
+    <Compile Include="App_Code\Helpers\ApiClient.cs" />
+    <Compile Include="App_Code\AirTable\AirTableClient.cs" />
+    <Compile Include="App_Code\Bitrix24\BitrixClient.cs" />
+    <Compile Include="App_Code\Bitrix24\EventResponse.cs" />
+    <Compile Include="App_Code\Bitrix24\LeadResponse.cs" />
+    <Compile Include="App_Code\Bitrix24\BitrixMethods.cs" />
+    <Compile Include="App_Code\Bitrix24\DealResponse.cs" />
+    <Compile Include="App_Code\AirTable\AbstractRecord.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -162,6 +169,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\BitrixController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
@@ -199,6 +207,7 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
+    <Content Include="ClassDiagram1.cd" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />
@@ -219,10 +228,18 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <None Include="Web.config.deploy" />
+    <None Include="Web.config.Debug.deploy">
+      <DependentUpon>Web.config.deploy</DependentUpon>
+    </None>
+    <None Include="Web.config.Release.deploy">
+      <DependentUpon>Web.config.deploy</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
+    <Folder Include="Views\Bitrix\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
