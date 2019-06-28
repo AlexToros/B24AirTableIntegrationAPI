@@ -3,46 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace B24AirTableIntegration.App_Code.Bitrix24
+namespace B24AirTableIntegration.Lib.Bitrix24
 {
-    public class PHONE
+    public class Lead : BitrixObject
     {
-        public string ID { get; set; }
-        public string VALUE_TYPE { get; set; }
-        public string VALUE { get; set; }
-        public string TYPE_ID { get; set; }
-    }
-
-    public class WEB
-    {
-        public string ID { get; set; }
-        public string VALUE_TYPE { get; set; }
-        public string VALUE { get; set; }
-        public string TYPE_ID { get; set; }
-    }
-
-    public class EMAIL
-    {
-        public string ID { get; set; }
-        public string VALUE_TYPE { get; set; }
-        public string VALUE { get; set; }
-        public string TYPE_ID { get; set; }
-    }
-
-    public class Lead
-    {
-        public string ID { get; set; }
-        public string TITLE { get; set; }
         public object HONORIFIC { get; set; }
         public object NAME { get; set; }
         public object SECOND_NAME { get; set; }
         public object LAST_NAME { get; set; }
         public object COMPANY_TITLE { get; set; }
         public string COMPANY_ID { get; set; }
-        public string CONTACT_ID { get; set; }
         public string IS_RETURN_CUSTOMER { get; set; }
         public string BIRTHDATE { get; set; }
-        public string SOURCE_ID { get; set; }
         public object SOURCE_DESCRIPTION { get; set; }
         public string STATUS_ID { get; set; }
         public object STATUS_DESCRIPTION { get; set; }
@@ -88,6 +60,9 @@ namespace B24AirTableIntegration.App_Code.Bitrix24
         public List<PHONE> PHONE { get; set; }
         public List<WEB> WEB { get; set; }
         public List<EMAIL> EMAIL { get; set; }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public Contact Contact { get; set; }
     }
 
     public class Time

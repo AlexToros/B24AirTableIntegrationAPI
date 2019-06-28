@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace B24AirTableIntegration.App_Code.Helpers
+namespace B24AirTableIntegration.Lib.Helpers
 {
     public class ApiClient
     {

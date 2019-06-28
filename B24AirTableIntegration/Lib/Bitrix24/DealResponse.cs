@@ -1,14 +1,13 @@
-﻿using System;
+﻿using B24AirTableIntegration.Lib.AirTable;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace B24AirTableIntegration.App_Code.Bitrix24
+namespace B24AirTableIntegration.Lib.Bitrix24
 {
-    public class Deal
+    public class Deal : BitrixObject
     {
-        public string ID { get; set; }
-        public string TITLE { get; set; }
         public string TYPE_ID { get; set; }
         public string STAGE_ID { get; set; }
         public object PROBABILITY { get; set; }
@@ -17,7 +16,6 @@ namespace B24AirTableIntegration.App_Code.Bitrix24
         public object TAX_VALUE { get; set; }
         public string LEAD_ID { get; set; }
         public string COMPANY_ID { get; set; }
-        public string CONTACT_ID { get; set; }
         public object QUOTE_ID { get; set; }
         public DateTime BEGINDATE { get; set; }
         public string CLOSEDATE { get; set; }
@@ -37,7 +35,6 @@ namespace B24AirTableIntegration.App_Code.Bitrix24
         public string IS_RECURRING { get; set; }
         public string IS_RETURN_CUSTOMER { get; set; }
         public string IS_REPEATED_APPROACH { get; set; }
-        public string SOURCE_ID { get; set; }
         public string SOURCE_DESCRIPTION { get; set; }
         public object ORIGINATOR_ID { get; set; }
         public object ORIGIN_ID { get; set; }
@@ -59,6 +56,28 @@ namespace B24AirTableIntegration.App_Code.Bitrix24
 
         [Newtonsoft.Json.JsonIgnore]
         public LeadResponse Lead { get; set; }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public BitrixObjectType Type
+        {
+            get
+            {
+                int i;
+                if (int.TryParse(UF_CRM_1539697408, out i))
+                {
+                    try
+                    {
+                        return (BitrixObjectType)i;
+                    }
+                    catch
+                    {
+                        return BitrixObjectType.None;
+                    }
+                }
+                else
+                    return BitrixObjectType.None;
+            }
+        }
     }
 
     public class DealResponse
@@ -66,5 +85,19 @@ namespace B24AirTableIntegration.App_Code.Bitrix24
         [Newtonsoft.Json.JsonProperty("result")]
         public Deal Deal { get; set; }
         public Time time { get; set; }
+
+        internal UpdatingRecord GetUpdatingRecord()
+        {
+            UpdatingRecord record = new UpdatingRecord()
+            {
+                fields = new Dictionary<string, object>()
+            };
+            record.fields.Add("Источник", Deal.Source);
+            record.fields.Add("Точка контакта", Deal.SOURCE_DESCRIPTION);
+            record.fields.Add("Дата обращения", Deal.DATE_CREATE);
+            //record.fields.Add("Тип клиента", Deal.DATE_CREATE); //Сопоставление
+            record.fields.Add("Основная информация", Deal.COMMENTS);
+            return record;
+        }
     }
 }

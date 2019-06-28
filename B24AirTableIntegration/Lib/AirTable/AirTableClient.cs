@@ -4,15 +4,36 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Configuration;
-using B24AirTableIntegration.App_Code.Helpers;
+using B24AirTableIntegration.Lib.Helpers;
 using Newtonsoft.Json;
-using B24AirTableIntegration.App_Code.Bitrix24;
+using B24AirTableIntegration.Lib.Bitrix24;
 
-namespace B24AirTableIntegration.App_Code.AirTable
+namespace B24AirTableIntegration.Lib.AirTable
 {
     public class AirTableClient : ApiClient
     {
-        public AirTableClient() : 
+        private static object syncRoot = new object();
+        private static AirTableClient client;
+
+        public static AirTableClient Instance
+        {
+            get
+            {
+                if (client == null)
+                {
+                    lock (syncRoot)
+                    {
+                        if (client == null)
+                        {
+                            client = new AirTableClient();
+                        }
+                    }
+                }
+                return client;
+            }
+        }
+
+        private AirTableClient() : 
             base(ConfigurationManager.AppSettings["AirTableURL"], new Dictionary<string, string> { { "Authorization", $"Bearer {ConfigurationManager.AppSettings["AirTableKey"]}" } })
         { 
         }
@@ -47,14 +68,16 @@ namespace B24AirTableIntegration.App_Code.AirTable
             } while (offset != null);
         }
 
-        internal void Update(LeadResponse lead)
+        public void Update(LeadResponse lead)
         {
             throw new NotImplementedException();
         }
 
-        internal void Update(DealResponse deal)
+        public void Update(DealResponse deal)
         {
-            throw new NotImplementedException();
+            var tableName = "Заявки";
+            var AtRecord_ID = GetFirstRecordID(tableName, $"Deal_ID='{deal.Deal.ID}'");
+            UpdateRecord(tableName, AtRecord_ID, deal.GetUpdatingRecord());
         }
 
         private void UpdateRecord<T>(string tableName, string updatingID, T updatingRecord)
@@ -64,10 +87,17 @@ namespace B24AirTableIntegration.App_Code.AirTable
 
         private string GetFirstRecordID(string tableName, string filter)
         {
-            var data = JsonConvert.DeserializeObject<AbstractRecords<AbstractRecord>>(GetRecords(tableName, filter, 1, 1).First());
+            var data = JsonConvert.DeserializeObject<BaseRecords<BaseRecord>>(GetRecords(tableName, filter, 1, 1).First());
             if (data != null && data.records.Count > 0)
                 return data.records[0].id;
             return "";
         }
+
+        #region For Tests
+        public string GetFirstRecordIDTest(string tableName, string filter)
+        {
+            return GetFirstRecordID(tableName, filter);
+        }
+        #endregion
     }
 }

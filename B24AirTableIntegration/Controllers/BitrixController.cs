@@ -4,8 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using B24AirTableIntegration.App_Code.Bitrix24;
-using B24AirTableIntegration.App_Code.AirTable;
+using B24AirTableIntegration.Lib.Bitrix24;
+using B24AirTableIntegration.Lib.AirTable;
 
 namespace B24AirTableIntegration.Controllers
 {
@@ -15,8 +15,8 @@ namespace B24AirTableIntegration.Controllers
         [Route("Bitrix/OnLeadChanged")]
         public void OnLeadChanged([FromBody]EventResponse response)
         {
-            BitrixClient Bitrix = new BitrixClient();
-            AirTableClient AirTable = new AirTableClient();
+            BitrixClient Bitrix = BitrixClient.Instance;
+            AirTableClient AirTable = AirTableClient.Instance;
                         
             var Lead = Bitrix.GetLead(response.data.fields.ID);
             AirTable.Update(Lead);
@@ -26,8 +26,8 @@ namespace B24AirTableIntegration.Controllers
         [Route("Bitrix/OnDealChanged")]
         public void OnDealChanged([FromBody]EventResponse response)
         {
-            BitrixClient Bitrix = new BitrixClient();
-            AirTableClient AirTable = new AirTableClient();
+            BitrixClient Bitrix = BitrixClient.Instance;
+            AirTableClient AirTable = AirTableClient.Instance;
 
             var Deal = Bitrix.GetDeal(response.data.fields.ID);
             AirTable.Update(Deal);
