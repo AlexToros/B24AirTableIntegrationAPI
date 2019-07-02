@@ -40,15 +40,18 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public LeadResponse GetLead(string id)
         {
             LeadResponse leadResponse = GetEntity<LeadResponse>(BitrixSettings.GET_LEAD, id);
-            leadResponse.Lead.Contact = GetEntity<Contact>(BitrixSettings.GET_CONTACT, leadResponse.Lead.CONTACT_ID);
-            leadResponse.Lead.AssignUser = GetEntity<UserResponse>(BitrixSettings.GET_USER, leadResponse.Lead.ASSIGNED_BY_ID);
+            if (leadResponse.Lead != null && leadResponse.Lead.CONTACT_ID != null)
+                leadResponse.Lead.Contact = GetEntity<Contact>(BitrixSettings.GET_CONTACT, leadResponse.Lead.CONTACT_ID);
+            if (leadResponse.Lead != null && leadResponse.Lead.ASSIGNED_BY_ID != null)
+                leadResponse.Lead.AssignUser = GetEntity<UserResponse>(BitrixSettings.GET_USER, leadResponse.Lead.ASSIGNED_BY_ID);
             return leadResponse;
         }
 
         public DealResponse GetDeal(string id)
         {
             DealResponse dealResponse = GetEntity<DealResponse>(BitrixSettings.GET_DEAL, id);
-            dealResponse.Deal.Lead = GetLead(dealResponse.Deal.LEAD_ID);
+            if (dealResponse.Deal != null && dealResponse.Deal.ASSIGNED_BY_ID != null)
+                dealResponse.Deal.Lead = GetLead(dealResponse.Deal.LEAD_ID);
             return dealResponse;
         }
 

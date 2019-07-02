@@ -26,8 +26,8 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public string HAS_IMOL { get; set; }
         public string CREATED_BY_ID { get; set; }
         public string MODIFY_BY_ID { get; set; }
-        public DateTime DATE_MODIFY { get; set; }
-        public DateTime DATE_CLOSED { get; set; }
+        public DateTime? DATE_MODIFY { get; set; }
+        public DateTime? DATE_CLOSED { get; set; }
         public string STATUS_SEMANTIC_ID { get; set; }
         public string OPENED { get; set; }
         public object ORIGINATOR_ID { get; set; }
@@ -45,7 +45,8 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public object UTM_CAMPAIGN { get; set; }
         public object UTM_CONTENT { get; set; }
         public object UTM_TERM { get; set; }
-        public string UF_CRM_1540290799 { get; set; }
+        [Newtonsoft.Json.JsonProperty("UF_CRM_1540290799")]
+        public List<int> Type_IDs { get; set; }
         public string UF_CRM_GA_CID { get; set; }
         public string UF_CRM_TRANID { get; set; }
         public string UF_CRM_COOKIES { get; set; }
@@ -55,8 +56,8 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         [Newtonsoft.Json.JsonProperty("UF_CRM_1561385937")]
         public string CountPeopleString { get; set; }
         [Newtonsoft.Json.JsonProperty("UF_CRM_1561385960")]
-        public DateTime CheckIn { get; set; }
-        [Newtonsoft.Json.JsonProperty("UF_CRM_1561385960")]
+        public DateTime? CheckIn { get; set; }
+        [Newtonsoft.Json.JsonProperty("UF_CRM_1561385988")]
         public string LivingDaysString { get; set; }
         public List<PHONE> PHONE { get; set; }
         public List<WEB> WEB { get; set; }
@@ -72,20 +73,18 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         {
             get
             {
-                int i;
-                if (int.TryParse(UF_CRM_1540290799, out i))
+                if (Type_IDs != null && Type_IDs.Count > 0)
                 {
                     try
                     {
-                        return (BitrixObjectType)i;
+                        return (BitrixObjectType)Type_IDs[0];
                     }
                     catch
                     {
                         return BitrixObjectType.None;
                     }
                 }
-                else
-                    return BitrixObjectType.None;
+                return BitrixObjectType.None;
             }
         }
 
@@ -158,17 +157,27 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             {
                 fields = new Dictionary<string, object>()
             };
-            record.fields.Add("Источник", Lead.Source);
-            record.fields.Add("Точка контакта", Lead.SOURCE_DESCRIPTION);
-            record.fields.Add("Дата обращения", Lead.DATE_CREATE);
+            if (Lead.Source != null)
+                record.fields.Add("Источник", Lead.Source);
+            if (Lead.SOURCE_DESCRIPTION != null)
+                record.fields.Add("Точка контакта", Lead.SOURCE_DESCRIPTION);
+            if (Lead.DATE_CREATE.HasValue && Lead.DATE_CREATE.Value != DateTime.MinValue)
+                record.fields.Add("Дата обращения", Lead.DATE_CREATE.Value.ToString("yyyy-MM-dd"));
             //record.fields.Add("Тип клиента", ); //Сопоставление
-            record.fields.Add("Основная информация", Lead.COMMENTS);
-            record.fields.Add("Клиент", Lead.Contact.AirTableString);
-            record.fields.Add("Клиент - Bitrix24", Lead.URL);
-            record.fields.Add("Кол-во человек", Lead.PeopleCount);
-            record.fields.Add("Заезд", Lead.CheckIn);
-            record.fields.Add("Срок заселения", Lead.LivingDaysCount);
-            record.fields.Add("Город", Lead.City);
+            if (Lead.COMMENTS != null)
+                record.fields.Add("Основная информация", Lead.COMMENTS);
+            if (Lead.Contact != null && !string.IsNullOrWhiteSpace(Lead.Contact.AirTableString))
+                record.fields.Add("Клиент", Lead.Contact.AirTableString);
+            if (Lead.URL != null)
+                record.fields.Add("Клиент - Bitrix24", Lead.URL);
+            if (Lead.PeopleCount != 0)
+                record.fields.Add("Кол-во человек", Lead.PeopleCount);
+            if (Lead.CheckIn.HasValue && Lead.CheckIn.Value != DateTime.MinValue)
+                record.fields.Add("Заезд", Lead.CheckIn.Value.ToString("yyyy-MM-dd"));
+            if (Lead.LivingDaysCount != 0)
+                record.fields.Add("Срок заселения", Lead.LivingDaysCount);
+            if (Lead.City != null)
+                record.fields.Add("Город", Lead.City);
 
             return record;
         }

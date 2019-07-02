@@ -49,8 +49,8 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public string HAS_PHONE { get; set; }
         public string HAS_EMAIL { get; set; }
         public string HAS_IMOL { get; set; }
-        public DateTime DATE_CREATE { get; set; }
-        public DateTime DATE_MODIFY { get; set; }
+        public DateTime? DATE_CREATE { get; set; }
+        public DateTime? DATE_MODIFY { get; set; }
         public string ASSIGNED_BY_ID { get; set; }
         public string CREATED_BY_ID { get; set; }
         public string MODIFY_BY_ID { get; set; }

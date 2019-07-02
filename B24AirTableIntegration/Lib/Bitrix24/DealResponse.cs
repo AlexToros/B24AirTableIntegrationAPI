@@ -17,11 +17,11 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public string LEAD_ID { get; set; }
         public string COMPANY_ID { get; set; }
         public object QUOTE_ID { get; set; }
-        public DateTime BEGINDATE { get; set; }
+        public DateTime? BEGINDATE { get; set; }
         public string CLOSEDATE { get; set; }
         public string CREATED_BY_ID { get; set; }
         public string MODIFY_BY_ID { get; set; }
-        public DateTime DATE_MODIFY { get; set; }
+        public DateTime? DATE_MODIFY { get; set; }
         public string OPENED { get; set; }
         public string CLOSED { get; set; }
         public object ADDITIONAL_INFO { get; set; }
@@ -49,7 +49,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         [Newtonsoft.Json.JsonProperty("UF_CRM_5D10DD65B7069")]
         public string CountPeopleString { get; set; }
         [Newtonsoft.Json.JsonProperty("UF_CRM_5D10DD65C34C5")]
-        public DateTime CheckIn { get; set; }
+        public DateTime? CheckIn { get; set; }
         [Newtonsoft.Json.JsonProperty("UF_CRM_5D10DD65CDCBD")]
         public string LivingDaysString { get; set; }
 
@@ -125,17 +125,27 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             {
                 fields = new Dictionary<string, object>()
             };
+            if(Deal.Source != null)
             record.fields.Add("Источник", Deal.Source);
-            record.fields.Add("Точка контакта", Deal.SOURCE_DESCRIPTION);
-            record.fields.Add("Дата обращения", Deal.DATE_CREATE);
+            if (Deal.SOURCE_DESCRIPTION != null)
+                record.fields.Add("Точка контакта", Deal.SOURCE_DESCRIPTION);
+            if (Deal.DATE_CREATE.HasValue && Deal.DATE_CREATE.Value != DateTime.MinValue)
+                record.fields.Add("Дата обращения", Deal.DATE_CREATE.Value.ToString("yyyy-MM-dd"));
             //record.fields.Add("Тип клиента", ); //Сопоставление
-            record.fields.Add("Основная информация", Deal.COMMENTS);
-            record.fields.Add("Клиент", Deal.Lead.Lead.Contact.AirTableString);
-            record.fields.Add("Клиент - Bitrix24", Deal.URL);
-            record.fields.Add("Кол-во человек", Deal.PeopleCount);
-            record.fields.Add("Заезд", Deal.CheckIn);
-            record.fields.Add("Срок заселения", Deal.LivingDaysCount);
-            record.fields.Add("Город", Deal.Lead.Lead.City);
+            if (Deal.COMMENTS != null)
+                record.fields.Add("Основная информация", Deal.COMMENTS);
+            if (Deal.Lead != null && Deal.Lead.Lead != null && Deal.Lead.Lead.Contact != null && !string.IsNullOrWhiteSpace(Deal.Lead.Lead.Contact.AirTableString))
+                record.fields.Add("Клиент", Deal.Lead.Lead.Contact.AirTableString);
+            if (Deal.URL != null)
+                record.fields.Add("Клиент - Bitrix24", Deal.URL);
+            if (Deal.PeopleCount != 0)
+                record.fields.Add("Кол-во человек", Deal.PeopleCount);
+            if (Deal.CheckIn.HasValue && Deal.CheckIn.Value != DateTime.MinValue)
+                record.fields.Add("Заезд", Deal.CheckIn.Value.ToString("yyyy-MM-dd"));
+            if (Deal.LivingDaysCount != 0)
+                record.fields.Add("Срок заселения", Deal.LivingDaysCount);
+            if (Deal.Lead != null && Deal.Lead.Lead != null && Deal.Lead.Lead.City != null)
+                record.fields.Add("Город", Deal.Lead.Lead.City);
 
             return record;
         }

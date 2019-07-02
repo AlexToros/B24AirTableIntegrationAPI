@@ -54,7 +54,7 @@ namespace B24AirTableIntegration.Lib.AirTable
             string offset = null;
             do
             {
-                string response = Get(TableName, Params);
+                string response = Get(Uri.EscapeUriString(TableName), Params);
                 var match = Regex.Match(response, "(\"offset\".+)}");
                 if (match.Success)
                 {
@@ -85,9 +85,12 @@ namespace B24AirTableIntegration.Lib.AirTable
                     updating.fields.Add("Статус заявки", newStatus);
                 }
 
-                var assignUserID = GetFirstRecordID("Пользователи B24", $"ID B24='{lead.Lead.ASSIGNED_BY_ID}'");
-                if (!string.IsNullOrWhiteSpace(assignUserID))
-                    updating.fields.Add("Ответственный", assignUserID);
+                if (lead.Lead.ASSIGNED_BY_ID != null)
+                {
+                    var assignUserID = GetFirstRecordID("Пользователи B24", "{ID B24}='" + lead.Lead.ASSIGNED_BY_ID + "'");
+                    if (!string.IsNullOrWhiteSpace(assignUserID))
+                        updating.fields.Add("Ответственный New", new string[] { assignUserID });
+                }
 
                 if (AtRecord_ID != null)
                 {
@@ -115,10 +118,12 @@ namespace B24AirTableIntegration.Lib.AirTable
                     updating.fields.Add("Статус заявки", newStatus);
                 }
 
-                var assignUserID = GetFirstRecordID("Пользователи B24", $"ID B24='{deal.Deal.ASSIGNED_BY_ID}'");
-                if (!string.IsNullOrWhiteSpace(assignUserID))
-                    updating.fields.Add("Ответственный", assignUserID);
-
+                if (deal.Deal.ASSIGNED_BY_ID != null)
+                {
+                    var assignUserID = GetFirstRecordID("Пользователи B24", "{ID B24}='"+deal.Deal.ASSIGNED_BY_ID+"'");
+                    if (!string.IsNullOrWhiteSpace(assignUserID))
+                        updating.fields.Add("Ответственный New", new string[] { assignUserID });
+                }
 
                 var AtRecord_ID = GetFirstRecordID(tableName, $"Deal_ID='{deal.Deal.ID}'");
                 if (AtRecord_ID != null)
@@ -145,13 +150,13 @@ namespace B24AirTableIntegration.Lib.AirTable
 
         private bool IsDealExist(string Lead_ID, out string recordID)
         {
-            recordID = GetFirstRecordID("Заявки", $"AND(Lead_ID='{Lead_ID}',LEN(Deal_ID)=0");
+            recordID = GetFirstRecordID("Заявки", $"AND(Lead_ID='{Lead_ID}',LEN(Deal_ID)=0)");
             if (recordID != null)
-                return false;
+                return true;
             else
             {
                 recordID = GetFirstRecordID("Заявки", $"Lead_ID='{Lead_ID}'");
-                return true;
+                return false;
             }
         }
 
@@ -215,12 +220,12 @@ namespace B24AirTableIntegration.Lib.AirTable
 
         private void UpdateRecord<T>(string tableName, string updatingID, T updatingRecord)
         {
-            Patch($@"{tableName}/{updatingID}", updatingRecord);
+            Patch($@"{Uri.EscapeUriString(tableName)}/{updatingID}", updatingRecord);
         }
 
         private void CreateRecord<T>(string tableName, T updatingRecord)
         {
-            Post($@"{tableName}", updatingRecord);
+            Post($@"{Uri.EscapeUriString(tableName)}", updatingRecord);
         }
 
         private string GetFirstRecordID(string tableName, string filter)

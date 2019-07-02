@@ -40,7 +40,12 @@ namespace B24AirTableIntegration.Lib.Helpers
         {
 
             string url = $"{Path.Combine(RootUrl, EndPoint).Trim('/')}?{GetTotalParamString(parameters)}".Trim('?');
+            
             string result;
+            using (StreamWriter sw = new StreamWriter(@"C:\Test\1.txt", true, Encoding.Default))
+            {
+                sw.WriteLine(url);
+            }
             using (var client = GetClient())
             {
                 result = Encoding.UTF8.GetString(client.DownloadData(url));
@@ -82,6 +87,12 @@ namespace B24AirTableIntegration.Lib.Helpers
         private string UploadContent(string EndPoint, string content, Dictionary<string, string> parameters = null, string method = "POST")
         {
             string url = $"{Path.Combine(RootUrl, EndPoint).Trim('/')}?{GetTotalParamString(parameters)}".Trim('?');
+            
+            using (StreamWriter sw = new StreamWriter(@"C:\Test\1.txt", true, Encoding.Default))
+            {
+                sw.WriteLine(url);
+                sw.WriteLine(content);
+            }
             byte[] result;
             using (var client = GetClient())
             {
@@ -96,7 +107,7 @@ namespace B24AirTableIntegration.Lib.Helpers
             string ParamString = parameters?.ToUrlString();
             if (!string.IsNullOrEmpty(ParamString))
                 res = ParamString;
-            ParamString = PermanentParams.ToUrlString();
+            ParamString = PermanentParams?.ToUrlString();
             if (!string.IsNullOrEmpty(res))
             {
                 if (!string.IsNullOrEmpty(ParamString))
@@ -130,8 +141,11 @@ namespace B24AirTableIntegration.Lib.Helpers
             StringBuilder sb = new StringBuilder();
             foreach (var item in dict)
             {
-
-                sb.AppendFormat("{0}={1}&", item.Key, Uri.EscapeDataString(item.Value));
+                using (StreamWriter sw = new StreamWriter(@"C:\Test\1.txt", true, Encoding.Default))
+                {
+                    sw.Write(item.Key); sw.WriteLine(" | " + item.Value);
+                }
+                    sb.AppendFormat("{0}={1}&", item.Key, Uri.EscapeDataString(item.Value));
             }
             return sb.Remove(sb.Length - 1, 1).ToString();
         }
