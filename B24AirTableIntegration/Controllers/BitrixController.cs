@@ -19,7 +19,7 @@ namespace B24AirTableIntegration.Controllers
             AirTableClient AirTable = AirTableClient.Instance;
                         
             var Lead = Bitrix.GetLead(response.data.fields.ID);
-            AirTable.Update(Lead);
+            AirTable.UpdateOrCreate(Lead);
         }
 
         [HttpPost]
@@ -30,7 +30,7 @@ namespace B24AirTableIntegration.Controllers
             AirTableClient AirTable = AirTableClient.Instance;
 
             var Deal = Bitrix.GetDeal(response.data.fields.ID);
-            AirTable.Update(Deal);
+            AirTable.UpdateOrCreate(Deal);
         }
         // GET api/<controller>
         public IEnumerable<string> Get()

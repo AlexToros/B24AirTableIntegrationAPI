@@ -68,16 +68,149 @@ namespace B24AirTableIntegration.Lib.AirTable
             } while (offset != null);
         }
 
-        public void Update(LeadResponse lead)
+        public void UpdateOrCreate(LeadResponse lead)
         {
-            throw new NotImplementedException();
+            if (lead.Lead != null)
+            {
+                var tableName = "Заявки";
+                string AtRecord_ID;
+                if (IsDealExist(lead.Lead.ID, out AtRecord_ID))
+                    return;
+
+                var updating = lead.GetUpdatingRecord();
+
+                string newStatus;
+                if (TryGetNewLeadStatus(lead.Lead.Type, lead.Lead.Status, out newStatus))
+                {
+                    updating.fields.Add("Статус заявки", newStatus);
+                }
+
+                var assignUserID = GetFirstRecordID("Пользователи B24", $"ID B24='{lead.Lead.ASSIGNED_BY_ID}'");
+                if (!string.IsNullOrWhiteSpace(assignUserID))
+                    updating.fields.Add("Ответственный", assignUserID);
+
+                if (AtRecord_ID != null)
+                {
+                    UpdateRecord(tableName, AtRecord_ID, updating);
+                }
+                else
+                {
+                    updating.fields.Add("Lead_ID", lead.Lead.ID);
+                    CreateRecord(tableName, updating);
+                }
+            }
         }
 
-        public void Update(DealResponse deal)
+        public void UpdateOrCreate(DealResponse deal)
         {
-            var tableName = "Заявки";
-            var AtRecord_ID = GetFirstRecordID(tableName, $"Deal_ID='{deal.Deal.ID}'");
-            UpdateRecord(tableName, AtRecord_ID, deal.GetUpdatingRecord());
+            if (deal.Deal != null)
+            {
+                var tableName = "Заявки";
+
+                var updating = deal.GetUpdatingRecord();
+
+                string newStatus;
+                if (TryGetNewDealStatus(deal.Deal.Type, deal.Deal.Status, out newStatus))
+                {
+                    updating.fields.Add("Статус заявки", newStatus);
+                }
+
+                var assignUserID = GetFirstRecordID("Пользователи B24", $"ID B24='{deal.Deal.ASSIGNED_BY_ID}'");
+                if (!string.IsNullOrWhiteSpace(assignUserID))
+                    updating.fields.Add("Ответственный", assignUserID);
+
+
+                var AtRecord_ID = GetFirstRecordID(tableName, $"Deal_ID='{deal.Deal.ID}'");
+                if (AtRecord_ID != null)
+                {
+                    UpdateRecord(tableName, AtRecord_ID, updating);
+                }
+                else
+                {
+                    updating.fields.Add("Deal_ID", deal.Deal.ID);
+                    AtRecord_ID = GetFirstRecordID(tableName, $"Lead_ID='{deal.Deal.LEAD_ID}'");
+                    if (AtRecord_ID != null)
+                    {
+                        UpdateRecord(tableName, AtRecord_ID, updating);
+                    }
+                    else
+                    {
+                        updating.fields.Add("Lead_ID", deal.Deal.LEAD_ID);
+                        CreateRecord(tableName, updating);
+                    }
+                }
+
+            }
+        }
+
+        private bool IsDealExist(string Lead_ID, out string recordID)
+        {
+            recordID = GetFirstRecordID("Заявки", $"AND(Lead_ID='{Lead_ID}',LEN(Deal_ID)=0");
+            if (recordID != null)
+                return false;
+            else
+            {
+                recordID = GetFirstRecordID("Заявки", $"Lead_ID='{Lead_ID}'");
+                return true;
+            }
+        }
+
+        private bool TryGetNewDealStatus(BitrixObjectType type, string status, out string newStatus)
+        {
+            string typeString = "";
+            switch (type)
+            {
+                case BitrixObjectType.None:
+                    newStatus = null;
+                    return false;
+                case BitrixObjectType.B2B:
+                    typeString = "Deal_B2B";
+                    break;
+                case BitrixObjectType.B2C:
+                    typeString = "Deal_B2C";
+                    break;
+            }
+
+            string response = GetRecords("Статусы B24", $"AND(Name='{status}',StatusType='{typeString}')", 1, 1).FirstOrDefault();
+            if (response != null)
+            {
+                var StatusResponce = JsonConvert.DeserializeObject<Statuses>(response);
+                if (StatusResponce.records != null && StatusResponce.records.Count > 0 && !string.IsNullOrWhiteSpace(StatusResponce.records[0].fields.AirTableStatus))
+                {
+                    newStatus = StatusResponce.records[0].fields.AirTableStatus;
+                    return true;
+                }
+            }
+            newStatus = null;
+            return false;
+        }
+
+        private bool TryGetNewLeadStatus(BitrixObjectType type, string status, out string newStatus)
+        {
+            string typeString = "";
+            switch (type)
+            {
+                case BitrixObjectType.None:
+                    newStatus = null;
+                    return false;
+                case BitrixObjectType.B2B:
+                case BitrixObjectType.B2C:
+                    typeString = "Lead";
+                    break;
+            }
+
+            string response = GetRecords("Статусы B24", $"AND(Name='{status}',StatusType='{typeString}')", 1, 1).FirstOrDefault();
+            if (response != null)
+            {
+                var StatusResponce = JsonConvert.DeserializeObject<Statuses>(response);
+                if (StatusResponce.records != null && StatusResponce.records.Count > 0 && !string.IsNullOrWhiteSpace(StatusResponce.records[0].fields.AirTableStatus))
+                {
+                    newStatus = StatusResponce.records[0].fields.AirTableStatus;
+                    return true;
+                }
+            }
+            newStatus = null;
+            return false;
         }
 
         private void UpdateRecord<T>(string tableName, string updatingID, T updatingRecord)
@@ -85,12 +218,17 @@ namespace B24AirTableIntegration.Lib.AirTable
             Patch($@"{tableName}/{updatingID}", updatingRecord);
         }
 
+        private void CreateRecord<T>(string tableName, T updatingRecord)
+        {
+            Post($@"{tableName}", updatingRecord);
+        }
+
         private string GetFirstRecordID(string tableName, string filter)
         {
             var data = JsonConvert.DeserializeObject<BaseRecords<BaseRecord>>(GetRecords(tableName, filter, 1, 1).First());
             if (data != null && data.records.Count > 0)
                 return data.records[0].id;
-            return "";
+            return null;
         }
 
         #region For Tests

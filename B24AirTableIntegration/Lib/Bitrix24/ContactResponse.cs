@@ -92,7 +92,16 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             get
             {
                 var client = BitrixClient.Instance;
-                return client.GetEnumFieldValue("CONTACT_TYPE", TYPE_ID);
+                return client.GetEnumFieldValue(BitrixSettings.CONTACT_TYPE_LIST_ID, TYPE_ID);
+            }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public string AirTableString
+        {
+            get
+            {
+                return $"{string.Join(" ", NAME, SECOND_NAME, LAST_NAME).Trim().Replace("  ", " ")} ({string.Join("; ", PHONE.Select(p => p.VALUE))})"; 
             }
         }
     }

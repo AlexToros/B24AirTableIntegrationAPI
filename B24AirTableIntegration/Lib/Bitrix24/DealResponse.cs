@@ -19,14 +19,11 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public object QUOTE_ID { get; set; }
         public DateTime BEGINDATE { get; set; }
         public string CLOSEDATE { get; set; }
-        public string ASSIGNED_BY_ID { get; set; }
         public string CREATED_BY_ID { get; set; }
         public string MODIFY_BY_ID { get; set; }
-        public DateTime DATE_CREATE { get; set; }
         public DateTime DATE_MODIFY { get; set; }
         public string OPENED { get; set; }
         public string CLOSED { get; set; }
-        public string COMMENTS { get; set; }
         public object ADDITIONAL_INFO { get; set; }
         public object LOCATION_ID { get; set; }
         public string CATEGORY_ID { get; set; }
@@ -35,7 +32,6 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public string IS_RECURRING { get; set; }
         public string IS_RETURN_CUSTOMER { get; set; }
         public string IS_REPEATED_APPROACH { get; set; }
-        public string SOURCE_DESCRIPTION { get; set; }
         public object ORIGINATOR_ID { get; set; }
         public object ORIGIN_ID { get; set; }
         public object UTM_SOURCE { get; set; }
@@ -50,9 +46,12 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public string UF_CRM_5D0B79DC20D5F { get; set; }
         public string UF_CRM_5D0CEBB99A40C { get; set; }
         public string UF_CRM_5D10DD65A2518 { get; set; }
-        public string UF_CRM_5D10DD65B7069 { get; set; }
-        public DateTime UF_CRM_5D10DD65C34C5 { get; set; }
-        public string UF_CRM_5D10DD65CDCBD { get; set; }
+        [Newtonsoft.Json.JsonProperty("UF_CRM_5D10DD65B7069")]
+        public string CountPeopleString { get; set; }
+        [Newtonsoft.Json.JsonProperty("UF_CRM_5D10DD65C34C5")]
+        public DateTime CheckIn { get; set; }
+        [Newtonsoft.Json.JsonProperty("UF_CRM_5D10DD65CDCBD")]
+        public string LivingDaysString { get; set; }
 
         [Newtonsoft.Json.JsonIgnore]
         public LeadResponse Lead { get; set; }
@@ -60,23 +59,57 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         [Newtonsoft.Json.JsonIgnore]
         public BitrixObjectType Type
         {
+            get => Lead.Lead.Type;
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public int PeopleCount
+        {
             get
             {
-                int i;
-                if (int.TryParse(UF_CRM_1539697408, out i))
-                {
-                    try
-                    {
-                        return (BitrixObjectType)i;
-                    }
-                    catch
-                    {
-                        return BitrixObjectType.None;
-                    }
-                }
-                else
-                    return BitrixObjectType.None;
+                int res = 0;
+                int.TryParse(CountPeopleString, out res);
+                return res;
             }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public int LivingDaysCount
+        {
+            get
+            {
+                int res = 0;
+                int.TryParse(LivingDaysString, out res);
+                return res;
+            }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public string Status
+        {
+            get
+            {
+                string list_ID;
+                switch (Type)
+                {
+                    case BitrixObjectType.B2B:
+                        list_ID = BitrixSettings.B2B_STATUS_LIST_ID;
+                        break;
+                    case BitrixObjectType.B2C:
+                        list_ID = BitrixSettings.B2C_STATUS_LIST_ID;
+                        break;
+                    default:
+                        return null;
+                }
+
+                return BitrixClient.Instance.GetEnumFieldValue(list_ID, STAGE_ID);
+            }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public string URL
+        {
+            get => $@"https://kvikroom.bitrix24.ru/crm/deal/details/{ID}/";
         }
     }
 
@@ -95,8 +128,15 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             record.fields.Add("Источник", Deal.Source);
             record.fields.Add("Точка контакта", Deal.SOURCE_DESCRIPTION);
             record.fields.Add("Дата обращения", Deal.DATE_CREATE);
-            //record.fields.Add("Тип клиента", Deal.DATE_CREATE); //Сопоставление
+            //record.fields.Add("Тип клиента", ); //Сопоставление
             record.fields.Add("Основная информация", Deal.COMMENTS);
+            record.fields.Add("Клиент", Deal.Lead.Lead.Contact.AirTableString);
+            record.fields.Add("Клиент - Bitrix24", Deal.URL);
+            record.fields.Add("Кол-во человек", Deal.PeopleCount);
+            record.fields.Add("Заезд", Deal.CheckIn);
+            record.fields.Add("Срок заселения", Deal.LivingDaysCount);
+            record.fields.Add("Город", Deal.Lead.Lead.City);
+
             return record;
         }
     }

@@ -10,7 +10,11 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public string ID { get; set; }
         public string TITLE { get; set; }
         public string SOURCE_ID { get; set; }
+        public string SOURCE_DESCRIPTION { get; set; }
         public string CONTACT_ID { get; set; }
+        public DateTime DATE_CREATE { get; set; }
+        public string COMMENTS { get; set; }
+        public string ASSIGNED_BY_ID { get; set; }
 
         [Newtonsoft.Json.JsonIgnore]
         public string Source
@@ -18,7 +22,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             get
             {
                 var client = BitrixClient.Instance;
-                return client.GetEnumFieldValue("SOURCE", SOURCE_ID);
+                return client.GetEnumFieldValue(BitrixSettings.SOURCE_LIST_ID, SOURCE_ID);
             }
         }
     }

@@ -39,14 +39,15 @@ namespace B24AirTableIntegration.Lib.Bitrix24
 
         public LeadResponse GetLead(string id)
         {
-            LeadResponse leadResponse = GetEntity<LeadResponse>(BitrixMethods.GET_LEAD, id);
-            leadResponse.Lead.Contact = GetEntity<Contact>(BitrixMethods.GET_CONTACT, leadResponse.Lead.CONTACT_ID);
+            LeadResponse leadResponse = GetEntity<LeadResponse>(BitrixSettings.GET_LEAD, id);
+            leadResponse.Lead.Contact = GetEntity<Contact>(BitrixSettings.GET_CONTACT, leadResponse.Lead.CONTACT_ID);
+            leadResponse.Lead.AssignUser = GetEntity<UserResponse>(BitrixSettings.GET_USER, leadResponse.Lead.ASSIGNED_BY_ID);
             return leadResponse;
         }
 
         public DealResponse GetDeal(string id)
         {
-            DealResponse dealResponse = GetEntity<DealResponse>(BitrixMethods.GET_DEAL, id);
+            DealResponse dealResponse = GetEntity<DealResponse>(BitrixSettings.GET_DEAL, id);
             dealResponse.Deal.Lead = GetLead(dealResponse.Deal.LEAD_ID);
             return dealResponse;
         }
@@ -58,11 +59,22 @@ namespace B24AirTableIntegration.Lib.Bitrix24
 
         internal string GetEnumFieldValue(string FieldName, string ID)
         {
-            EnumFieldItems items = Get<EnumFieldItems>(BitrixMethods.GET_ENUM_VALUES, new Dictionary<string, string>
+            EnumFieldItems items = Get<EnumFieldItems>(BitrixSettings.GET_ENUM_VALUES, new Dictionary<string, string>
             {
                 { "entity_id", FieldName}
             });
             return items.Items.FirstOrDefault(x => x.STATUS_ID == ID)?.NAME;
+        }
+
+        internal string GetLeadEnumUserFieldValue(string FieldName, string Enum_ID)
+        {
+            var ef = Get<UserEnumFieldResponse>(BitrixSettings.GET_USER_ENUM_VALUE,
+                new Dictionary<string, string> {
+                    { "filter[FIELD_NAME]", FieldName}
+                });
+            if (ef != null && ef.result != null && ef.result.Count > 0 && ef.result[0].LIST != null)
+                return ef.result[0].LIST.FirstOrDefault(x => x.ID == Enum_ID)?.VALUE;
+            return null;
         }
     }
 }

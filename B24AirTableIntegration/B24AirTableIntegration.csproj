@@ -129,16 +129,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Lib\AirTable\Status.cs" />
     <Compile Include="Lib\Bitrix24\BitrixObject.cs" />
     <Compile Include="Lib\Bitrix24\BitrixObjectType.cs" />
     <Compile Include="Lib\Bitrix24\ContactResponse.cs" />
     <Compile Include="Lib\Bitrix24\EnumFieldItems.cs" />
+    <Compile Include="Lib\Bitrix24\UserEnumFieldResponse.cs" />
+    <Compile Include="Lib\Bitrix24\UserResponse.cs" />
     <Compile Include="Lib\Helpers\ApiClient.cs" />
     <Compile Include="Lib\AirTable\AirTableClient.cs" />
     <Compile Include="Lib\Bitrix24\BitrixClient.cs" />
     <Compile Include="Lib\Bitrix24\EventResponse.cs" />
     <Compile Include="Lib\Bitrix24\LeadResponse.cs" />
-    <Compile Include="Lib\Bitrix24\BitrixMethods.cs" />
+    <Compile Include="Lib\Bitrix24\BitrixSettings.cs" />
     <Compile Include="Lib\Bitrix24\DealResponse.cs" />
     <Compile Include="Lib\AirTable\BaseRecord.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
