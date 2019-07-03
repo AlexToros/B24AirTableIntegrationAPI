@@ -1,7 +1,10 @@
 ﻿using B24AirTableIntegration.Lib.AirTable;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace B24AirTableIntegration.Lib.Bitrix24
@@ -53,13 +56,45 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         [Newtonsoft.Json.JsonProperty("UF_CRM_5D10DD65CDCBD")]
         public string LivingDaysString { get; set; }
 
+        private LeadResponse lead = null;
         [Newtonsoft.Json.JsonIgnore]
-        public LeadResponse Lead { get; set; }
+        public LeadResponse Lead {
+            get
+            {
+                if (lead == null)
+                {
+                    if (string.IsNullOrWhiteSpace(LEAD_ID))
+                        return null;
+                    lead = BitrixClient.Instance.GetLead(LEAD_ID);
+                }
+                return lead;
+            }
+            set
+            {
+                lead = value;
+            }
+        }
 
         [Newtonsoft.Json.JsonIgnore]
         public BitrixObjectType Type
         {
-            get => Lead.Lead.Type;
+            get
+            {
+                if (Lead.Lead != null)
+                    return Lead.Lead.Type;
+                return BitrixObjectType.None;
+            }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public bool IsValid
+        {
+            get
+            {
+                if (Lead.Lead != null)
+                    return Lead.Lead.IsValid;
+                return false;
+            }
         }
 
         [Newtonsoft.Json.JsonIgnore]
@@ -131,11 +166,14 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 record.fields.Add("Точка контакта", Deal.SOURCE_DESCRIPTION);
             if (Deal.DATE_CREATE.HasValue && Deal.DATE_CREATE.Value != DateTime.MinValue)
                 record.fields.Add("Дата обращения", Deal.DATE_CREATE.Value.ToString("yyyy-MM-dd"));
-            //record.fields.Add("Тип клиента", ); //Сопоставление
             if (Deal.COMMENTS != null)
-                record.fields.Add("Основная информация", Deal.COMMENTS);
-            if (Deal.Lead != null && Deal.Lead.Lead != null && Deal.Lead.Lead.Contact != null && !string.IsNullOrWhiteSpace(Deal.Lead.Lead.Contact.AirTableString))
-                record.fields.Add("Клиент", Deal.Lead.Lead.Contact.AirTableString);
+                record.fields.Add("Основная информация", Regex.Replace(Deal.COMMENTS, "<[^>]+>", string.Empty));
+
+            if (Deal.Lead != null && Deal.Lead.Lead != null && !string.IsNullOrEmpty(Deal.Lead.Lead.AirTableClientString))
+                record.fields.Add("Клиент", Deal.Lead.Lead.AirTableClientString);
+            else if (Deal.Lead != null && Deal.Lead.Lead != null && Deal.Lead.Lead.Contact != null && Deal.Lead.Lead.Contact.Contact != null && !string.IsNullOrWhiteSpace(Deal.Lead.Lead.Contact.Contact.AirTableString))
+                record.fields.Add("Клиент", Deal.Lead.Lead.Contact.Contact.AirTableString);
+
             if (Deal.URL != null)
                 record.fields.Add("Клиент - Bitrix24", Deal.URL);
             if (Deal.PeopleCount != 0)
@@ -143,9 +181,13 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             if (Deal.CheckIn.HasValue && Deal.CheckIn.Value != DateTime.MinValue)
                 record.fields.Add("Заезд", Deal.CheckIn.Value.ToString("yyyy-MM-dd"));
             if (Deal.LivingDaysCount != 0)
-                record.fields.Add("Срок заселения", Deal.LivingDaysCount);
+                record.fields.Add("Срок заселения / дней", Deal.LivingDaysCount);
             if (Deal.Lead != null && Deal.Lead.Lead != null && Deal.Lead.Lead.City != null)
                 record.fields.Add("Город", Deal.Lead.Lead.City);
+            if (Deal.Lead != null && Deal.Lead.Lead != null && Deal.Lead.Lead.ClientType != null)
+                record.fields.Add("Тип клиента", Deal.Lead.Lead.ClientType);
+            if (Deal.Lead != null && Deal.Lead.Lead != null && Deal.Lead.Lead.TypeName != null)
+                record.fields.Add("Тип Лида/Сделки", Deal.Lead.Lead.TypeName);
 
             return record;
         }

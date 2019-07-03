@@ -6,26 +6,18 @@ using System.Net.Http;
 using System.Web.Http;
 using B24AirTableIntegration.Lib.Bitrix24;
 using B24AirTableIntegration.Lib.AirTable;
-using System.IO;
-using System.Text;
+using B24AirTableIntegration.Lib.Helpers;
 
 namespace B24AirTableIntegration.Controllers
 {
     public class BitrixController : ApiController
-    {
-        [HttpPost]
-        [Route("bitrix/test")]
-        public void Test([FromBody]EventResponse response)
-        {
-            Log(response.data.fields.ID);
-        }
-
+    {        
         [HttpPost]
         [Route("bitrix/onleadchanged")]
         public void OnLeadChanged([FromBody]EventResponse response)
         {
-            Log("Изменение лида");
-            Log(response.data.fields.ID);
+            Log.Debug("Изменение лида");
+            Log.Debug(response.data.fields.ID);
             try
             {
                 BitrixClient Bitrix = BitrixClient.Instance;
@@ -37,7 +29,7 @@ namespace B24AirTableIntegration.Controllers
             }
             catch (Exception ex)
             {
-                Log(ex.ToString());
+                Log.Debug(ex.ToString());
             }
         }
 
@@ -45,12 +37,21 @@ namespace B24AirTableIntegration.Controllers
         [Route("bitrix/ondealchanged")]
         public void OnDealChanged([FromBody]EventResponse response)
         {
-            BitrixClient Bitrix = BitrixClient.Instance;
-            AirTableClient AirTable = AirTableClient.Instance;
+            try
+            {
+                Log.Debug("Изменение сделки");
+                Log.Debug(response.data.fields.ID);
+                BitrixClient Bitrix = BitrixClient.Instance;
+                AirTableClient AirTable = AirTableClient.Instance;
 
-            var Deal = Bitrix.GetDeal(response.data.fields.ID);
-            if (Deal.Deal.DATE_CREATE > new DateTime(2019, 7, 2, 13, 11, 0))
-                AirTable.UpdateOrCreate(Deal);
+                var Deal = Bitrix.GetDeal(response.data.fields.ID);
+                if (Deal.Deal.DATE_CREATE > new DateTime(2019, 7, 2, 13, 11, 0))
+                    AirTable.UpdateOrCreate(Deal);
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex.ToString());
+            }
         }
         // GET api/<controller>
         public IEnumerable<string> Get()
@@ -77,12 +78,6 @@ namespace B24AirTableIntegration.Controllers
         // DELETE api/<controller>/5
         public void Delete(int id)
         {
-        }
-
-        private void Log(string message)
-        {
-            using (StreamWriter sw = new StreamWriter(@"C:\Test\1.txt", true, Encoding.Default))
-                sw.WriteLine(message);
         }
     }
 }

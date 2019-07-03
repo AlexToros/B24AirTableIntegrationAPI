@@ -7,6 +7,8 @@ using System.Configuration;
 using B24AirTableIntegration.Lib.Helpers;
 using Newtonsoft.Json;
 using B24AirTableIntegration.Lib.Bitrix24;
+using System.IO;
+using System.Text;
 
 namespace B24AirTableIntegration.Lib.AirTable
 {
@@ -37,6 +39,7 @@ namespace B24AirTableIntegration.Lib.AirTable
             base(ConfigurationManager.AppSettings["AirTableURL"], new Dictionary<string, string> { { "Authorization", $"Bearer {ConfigurationManager.AppSettings["AirTableKey"]}" } })
         { 
         }
+        
 
         private IEnumerable<string> GetRecords(string TableName, string filter, int PageSize, int maxCount, params string[] fieldNames)
         {
@@ -72,6 +75,9 @@ namespace B24AirTableIntegration.Lib.AirTable
         {
             if (lead.Lead != null)
             {
+                Log.Debug("Тип лида - " + lead.Lead.Type.ToString());
+                if (lead.Lead.IsValid) return;
+
                 var tableName = "Заявки";
                 string AtRecord_ID;
                 if (IsDealExist(lead.Lead.ID, out AtRecord_ID))
@@ -88,6 +94,12 @@ namespace B24AirTableIntegration.Lib.AirTable
                 if (lead.Lead.ASSIGNED_BY_ID != null)
                 {
                     var assignUserID = GetFirstRecordID("Пользователи B24", "{ID B24}='" + lead.Lead.ASSIGNED_BY_ID + "'");
+                    if (string.IsNullOrWhiteSpace(assignUserID))
+                    {
+                        Log.Debug("Обновление справочника пользователей");
+                        RefreshUsersDictionary(lead.Lead.AssignUser, out assignUserID);
+                        Log.Debug("Новый ID: " + assignUserID);
+                    }
                     if (!string.IsNullOrWhiteSpace(assignUserID))
                         updating.fields.Add("Ответственный New", new string[] { assignUserID });
                 }
@@ -102,14 +114,38 @@ namespace B24AirTableIntegration.Lib.AirTable
                     CreateRecord(tableName, updating);
                 }
             }
+            else
+            {
+                Log.Debug("Старый лид");
+            }
+        }
+
+        private void RefreshUsersDictionary(UserResponse assignUser, out string id)
+        {
+            if (assignUser.Users != null && assignUser.Users.Count > 0)
+            {
+                CreationResponse resp = CreateRecord<CreationResponse, UpdatingRecord>("Пользователи B24", new UpdatingRecord
+                {
+                    fields = new Dictionary<string, object>
+                    {
+                        { "Name", assignUser.Users[0].NAME },
+                        { "ID B24", assignUser.Users[0].ID }
+                    }
+                });
+                id = resp.id;
+            }
+            else
+                id = null;
         }
 
         public void UpdateOrCreate(DealResponse deal)
         {
             if (deal.Deal != null)
             {
+                Log.Debug("Тип сделки - " + deal.Deal.Type.ToString());
+                if (deal.Deal.IsValid) return;
                 var tableName = "Заявки";
-
+                
                 var updating = deal.GetUpdatingRecord();
 
                 string newStatus;
@@ -126,6 +162,7 @@ namespace B24AirTableIntegration.Lib.AirTable
                 }
 
                 var AtRecord_ID = GetFirstRecordID(tableName, $"Deal_ID='{deal.Deal.ID}'");
+
                 if (AtRecord_ID != null)
                 {
                     UpdateRecord(tableName, AtRecord_ID, updating);
@@ -144,13 +181,16 @@ namespace B24AirTableIntegration.Lib.AirTable
                         CreateRecord(tableName, updating);
                     }
                 }
-
+            }
+            else
+            {
+                Log.Debug("Старая сделка");
             }
         }
 
         private bool IsDealExist(string Lead_ID, out string recordID)
         {
-            recordID = GetFirstRecordID("Заявки", $"AND(Lead_ID='{Lead_ID}',LEN(Deal_ID)=0)");
+            recordID = GetFirstRecordID("Заявки", $"AND(Lead_ID='{Lead_ID}',LEN(Deal_ID)>0)");
             if (recordID != null)
                 return true;
             else
@@ -221,6 +261,11 @@ namespace B24AirTableIntegration.Lib.AirTable
         private void UpdateRecord<T>(string tableName, string updatingID, T updatingRecord)
         {
             Patch($@"{Uri.EscapeUriString(tableName)}/{updatingID}", updatingRecord);
+        }
+
+        private TResponse CreateRecord<TResponse, T>(string tableName, T updatingRecord)
+        {
+            return JsonConvert.DeserializeObject<TResponse>(Post($@"{Uri.EscapeUriString(tableName)}", updatingRecord));
         }
 
         private void CreateRecord<T>(string tableName, T updatingRecord)

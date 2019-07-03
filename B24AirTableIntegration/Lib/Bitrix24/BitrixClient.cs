@@ -5,7 +5,8 @@ using System.Web;
 using Newtonsoft.Json;
 using System.Configuration;
 using B24AirTableIntegration.Lib.Helpers;
-
+using System.IO;
+using System.Text;
 
 namespace B24AirTableIntegration.Lib.Bitrix24
 {
@@ -41,10 +42,20 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         {
             LeadResponse leadResponse = GetEntity<LeadResponse>(BitrixSettings.GET_LEAD, id);
             if (leadResponse.Lead != null && leadResponse.Lead.CONTACT_ID != null)
-                leadResponse.Lead.Contact = GetEntity<Contact>(BitrixSettings.GET_CONTACT, leadResponse.Lead.CONTACT_ID);
+                leadResponse.Lead.Contact = GetContact(leadResponse.Lead.CONTACT_ID);
             if (leadResponse.Lead != null && leadResponse.Lead.ASSIGNED_BY_ID != null)
-                leadResponse.Lead.AssignUser = GetEntity<UserResponse>(BitrixSettings.GET_USER, leadResponse.Lead.ASSIGNED_BY_ID);
+                leadResponse.Lead.AssignUser = GetUser(leadResponse.Lead.ASSIGNED_BY_ID);
             return leadResponse;
+        }
+
+        public UserResponse GetUser(string id)
+        {
+            return GetEntity<UserResponse>(BitrixSettings.GET_USER, id);
+        }
+
+        public ContactResponse GetContact(string id)
+        {
+            return GetEntity<ContactResponse>(BitrixSettings.GET_CONTACT, id);
         }
 
         public DealResponse GetDeal(string id)
@@ -62,6 +73,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
 
         internal string GetEnumFieldValue(string FieldName, string ID)
         {
+            if (string.IsNullOrWhiteSpace(ID)) return null;
             EnumFieldItems items = Get<EnumFieldItems>(BitrixSettings.GET_ENUM_VALUES, new Dictionary<string, string>
             {
                 { "entity_id", FieldName}
@@ -71,6 +83,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
 
         internal string GetLeadEnumUserFieldValue(string FieldName, string Enum_ID)
         {
+            if (string.IsNullOrWhiteSpace(Enum_ID)) return null;
             var ef = Get<UserEnumFieldResponse>(BitrixSettings.GET_USER_ENUM_VALUE,
                 new Dictionary<string, string> {
                     { "filter[FIELD_NAME]", FieldName}
@@ -79,5 +92,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 return ef.result[0].LIST.FirstOrDefault(x => x.ID == Enum_ID)?.VALUE;
             return null;
         }
+
+        
     }
 }

@@ -20,4 +20,8 @@ namespace B24AirTableIntegration.Lib.AirTable
     {
         public Dictionary<string, object> fields { get; set; }
     }
+    public class CreationResponse
+    {
+        public string id { get; set; }
+    }
 }

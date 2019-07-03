@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace B24AirTableIntegration.Lib.Bitrix24
@@ -9,9 +10,9 @@ namespace B24AirTableIntegration.Lib.Bitrix24
     public class Lead : BitrixObject
     {
         public object HONORIFIC { get; set; }
-        public object NAME { get; set; }
-        public object SECOND_NAME { get; set; }
-        public object LAST_NAME { get; set; }
+        public string NAME { get; set; }
+        public string SECOND_NAME { get; set; }
+        public string LAST_NAME { get; set; }
         public object COMPANY_TITLE { get; set; }
         public string COMPANY_ID { get; set; }
         public string IS_RETURN_CUSTOMER { get; set; }
@@ -59,14 +60,122 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public DateTime? CheckIn { get; set; }
         [Newtonsoft.Json.JsonProperty("UF_CRM_1561385988")]
         public string LivingDaysString { get; set; }
+        [Newtonsoft.Json.JsonProperty("UF_CRM_1562078925")]
+        public string ClientType_ID { get; set; }
         public List<PHONE> PHONE { get; set; }
         public List<WEB> WEB { get; set; }
         public List<EMAIL> EMAIL { get; set; }
 
+        private ContactResponse contact = null;
         [Newtonsoft.Json.JsonIgnore]
-        public Contact Contact { get; set; }
+        public ContactResponse Contact
+        {
+            get
+            {
+                if (contact == null)
+                {
+                    if (string.IsNullOrWhiteSpace(CONTACT_ID))
+                        return null;
+                    contact = BitrixClient.Instance.GetContact(CONTACT_ID);
+                }
+                return contact;
+            }
+            set
+            {
+                contact = value;
+            }
+        }
+
+        private UserResponse assignUser = null;
         [Newtonsoft.Json.JsonIgnore]
-        public UserResponse AssignUser { get; set; }
+        public UserResponse AssignUser
+        {
+            get
+            {
+                if (assignUser == null)
+                {
+                    if (string.IsNullOrWhiteSpace(ASSIGNED_BY_ID))
+                        return null;
+                    assignUser = BitrixClient.Instance.GetUser(ASSIGNED_BY_ID);
+                }
+                return assignUser;
+            }
+            set
+            {
+                assignUser = value;
+            }
+        }
+
+        public string typeName = null;
+        [Newtonsoft.Json.JsonIgnore]
+        public string TypeName
+        {
+            get
+            {
+                switch (Type)
+                {
+                    default:
+                    case BitrixObjectType.None:
+                        return null;
+                    case BitrixObjectType.B2B:
+                    case BitrixObjectType.B2C:
+                        if (string.IsNullOrWhiteSpace(typeName))
+                        {
+                            typeName = BitrixClient.Instance.GetLeadEnumUserFieldValue("UF_CRM_1540290799", Type_IDs[0].ToString());
+                        }
+                        return typeName;
+                }
+            }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public string FIO
+        {
+            get
+            {
+                string res = string.Join(" ", (string.IsNullOrWhiteSpace(NAME) ? "" : NAME),
+                    (string.IsNullOrWhiteSpace(SECOND_NAME) ? "" : SECOND_NAME),
+                    (string.IsNullOrWhiteSpace(LAST_NAME) ? "" : LAST_NAME)).Trim().Replace("  ", " ");
+                if (!string.IsNullOrWhiteSpace(res))
+                    return res;
+                return null;
+            }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public string PhoneString
+        {
+            get
+            {
+                if (PHONE != null && PHONE.Count(p => p.VALUE != null) > 0)
+                    return string.Join("; ", PHONE.Where(p => p.VALUE != null).Select(p => p.VALUE));
+                return null;
+            }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public string AirTableClientString
+        {
+            get
+            {
+                if (FIO != null)
+                {
+                    if (PhoneString != null)
+                        return $"{FIO} ({PhoneString})";
+                    return FIO;
+                }
+                return null;
+            }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public bool IsValid
+        {
+            get
+            {
+                return (Type != BitrixObjectType.B2C && Type != BitrixObjectType.B2B);
+            }
+        }
 
         [Newtonsoft.Json.JsonIgnore]
         public BitrixObjectType Type
@@ -105,12 +214,31 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             get => $@"https://kvikroom.bitrix24.ru/crm/lead/details/{ID}/";
         }
 
+        private string city = null;
         [Newtonsoft.Json.JsonIgnore]
         public string City
         {
             get
             {
-                return BitrixClient.Instance.GetLeadEnumUserFieldValue("UF_CRM_1561384018", City_ID);
+                if (string.IsNullOrWhiteSpace(city))
+                {
+                    city = BitrixClient.Instance.GetLeadEnumUserFieldValue("UF_CRM_1561384018", City_ID);
+                }
+                return city;
+            }
+        }
+
+        private string clientType = null;
+        [Newtonsoft.Json.JsonIgnore]
+        public string ClientType
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(clientType))
+                {
+                    clientType = BitrixClient.Instance.GetLeadEnumUserFieldValue("UF_CRM_1562078925", ClientType_ID);
+                }
+                return clientType;
             }
         }
 
@@ -125,12 +253,17 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             }
         }
 
+        private string status = null;
         [Newtonsoft.Json.JsonIgnore]
         public string Status
         {
             get
             {
-                return BitrixClient.Instance.GetEnumFieldValue(BitrixSettings.LEAD_STATUS_LIST_ID, STATUS_ID);
+                if (string.IsNullOrWhiteSpace(status))
+                {
+                    status = BitrixClient.Instance.GetEnumFieldValue(BitrixSettings.LEAD_STATUS_LIST_ID, STATUS_ID);
+                }
+                return status;
             }
         }
     }
@@ -163,11 +296,14 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 record.fields.Add("Точка контакта", Lead.SOURCE_DESCRIPTION);
             if (Lead.DATE_CREATE.HasValue && Lead.DATE_CREATE.Value != DateTime.MinValue)
                 record.fields.Add("Дата обращения", Lead.DATE_CREATE.Value.ToString("yyyy-MM-dd"));
-            //record.fields.Add("Тип клиента", ); //Сопоставление
             if (Lead.COMMENTS != null)
-                record.fields.Add("Основная информация", Lead.COMMENTS);
-            if (Lead.Contact != null && !string.IsNullOrWhiteSpace(Lead.Contact.AirTableString))
-                record.fields.Add("Клиент", Lead.Contact.AirTableString);
+                record.fields.Add("Основная информация", Regex.Replace(Lead.COMMENTS, "<[^>]+>", string.Empty));
+
+            if (!string.IsNullOrEmpty(Lead.AirTableClientString))
+                record.fields.Add("Клиент", Lead.AirTableClientString);
+            else if (Lead.Contact != null && Lead.Contact.Contact != null && !string.IsNullOrWhiteSpace(Lead.Contact.Contact.AirTableString))
+                record.fields.Add("Клиент", Lead.Contact.Contact.AirTableString);
+
             if (Lead.URL != null)
                 record.fields.Add("Клиент - Bitrix24", Lead.URL);
             if (Lead.PeopleCount != 0)
@@ -175,9 +311,13 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             if (Lead.CheckIn.HasValue && Lead.CheckIn.Value != DateTime.MinValue)
                 record.fields.Add("Заезд", Lead.CheckIn.Value.ToString("yyyy-MM-dd"));
             if (Lead.LivingDaysCount != 0)
-                record.fields.Add("Срок заселения", Lead.LivingDaysCount);
+                record.fields.Add("Срок заселения / дней", Lead.LivingDaysCount);
             if (Lead.City != null)
                 record.fields.Add("Город", Lead.City);
+            if (Lead.ClientType != null)
+                record.fields.Add("Тип клиента", Lead.ClientType);
+            if (Lead.TypeName != null)
+                record.fields.Add("Тип Лида/Сделки", Lead.TypeName);
 
             return record;
         }

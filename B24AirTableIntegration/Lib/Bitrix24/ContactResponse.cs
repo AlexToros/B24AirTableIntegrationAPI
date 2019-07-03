@@ -85,6 +85,30 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public List<EMAIL> EMAIL { get; set; }
         public List<WEB> WEB { get; set; }
 
+        [Newtonsoft.Json.JsonIgnore]
+        public string FIO
+        {
+            get
+            {
+                string res =  string.Join(" ", (string.IsNullOrWhiteSpace(NAME) ? "" : NAME),
+                    (string.IsNullOrWhiteSpace(SECOND_NAME) ? "" : SECOND_NAME),
+                    (string.IsNullOrWhiteSpace(LAST_NAME) ? "" : LAST_NAME)).Trim().Replace("  ", " ");
+                if (!string.IsNullOrWhiteSpace(res))
+                    return res;
+                return null;
+            }
+        }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public string PhoneString
+        {
+            get
+            {
+                if (PHONE != null && PHONE.Count(p => p.VALUE != null) > 0)
+                    return string.Join("; ", PHONE.Where(p => p.VALUE != null).Select(p => p.VALUE));
+                return null;
+            }
+        }
 
         [Newtonsoft.Json.JsonIgnore]
         public string Type
@@ -101,7 +125,13 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         {
             get
             {
-                return $"{string.Join(" ", NAME, SECOND_NAME, LAST_NAME).Trim().Replace("  ", " ")} ({string.Join("; ", PHONE.Select(p => p.VALUE))})"; 
+                if (FIO != null)
+                {
+                    if(PhoneString != null)
+                        return $"{FIO} ({PhoneString})";
+                    return FIO;
+                }
+                return null;
             }
         }
     }
