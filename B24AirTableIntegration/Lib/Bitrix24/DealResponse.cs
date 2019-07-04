@@ -56,6 +56,26 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         [Newtonsoft.Json.JsonProperty("UF_CRM_5D10DD65CDCBD")]
         public string LivingDaysString { get; set; }
 
+        private UserResponse assignUser = null;
+        [Newtonsoft.Json.JsonIgnore]
+        public UserResponse AssignUser
+        {
+            get
+            {
+                if (assignUser == null)
+                {
+                    if (string.IsNullOrWhiteSpace(ASSIGNED_BY_ID))
+                        return null;
+                    assignUser = BitrixClient.Instance.GetUser(ASSIGNED_BY_ID);
+                }
+                return assignUser;
+            }
+            set
+            {
+                assignUser = value;
+            }
+        }
+
         private LeadResponse lead = null;
         [Newtonsoft.Json.JsonIgnore]
         public LeadResponse Lead {

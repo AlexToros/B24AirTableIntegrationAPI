@@ -11,10 +11,14 @@ namespace B24AirTableIntegration.Lib.Helpers
     {
         public static void Debug(string message)
         {
-            using (StreamWriter sw = new StreamWriter(@"C:\Test\log.txt", true))
+            try
             {
-                sw.WriteLine($"DEBUG ({DateTime.Now}) THREAD_ID {Thread.CurrentThread.ManagedThreadId} : {message}");
+                using (StreamWriter sw = new StreamWriter(@"C:\Test\log.txt", true))
+                {
+                    sw.WriteLine($"DEBUG ({DateTime.Now}) THREAD_ID {Thread.CurrentThread.ManagedThreadId} : {message}");
+                }
             }
+            catch { }
         }
     }
 }

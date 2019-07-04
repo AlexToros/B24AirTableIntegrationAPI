@@ -94,6 +94,8 @@ namespace B24AirTableIntegration.Lib.AirTable
                 if (lead.Lead.ASSIGNED_BY_ID != null)
                 {
                     var assignUserID = GetFirstRecordID("Пользователи B24", "{ID B24}='" + lead.Lead.ASSIGNED_BY_ID + "'");
+                    
+                    Log.Debug("Получение пользователя по ID " + lead.Lead.ASSIGNED_BY_ID);
                     if (string.IsNullOrWhiteSpace(assignUserID))
                     {
                         Log.Debug("Обновление справочника пользователей");
@@ -113,10 +115,6 @@ namespace B24AirTableIntegration.Lib.AirTable
                     updating.fields.Add("Lead_ID", lead.Lead.ID);
                     CreateRecord(tableName, updating);
                 }
-            }
-            else
-            {
-                Log.Debug("Старый лид");
             }
         }
 
@@ -156,7 +154,15 @@ namespace B24AirTableIntegration.Lib.AirTable
 
                 if (deal.Deal.ASSIGNED_BY_ID != null)
                 {
-                    var assignUserID = GetFirstRecordID("Пользователи B24", "{ID B24}='"+deal.Deal.ASSIGNED_BY_ID+"'");
+                    var assignUserID = GetFirstRecordID("Пользователи B24", "{ID B24}='" + deal.Deal.ASSIGNED_BY_ID + "'");
+                    
+                    Log.Debug("Получение пользователя по ID " + deal.Deal.ASSIGNED_BY_ID);
+                    if (string.IsNullOrWhiteSpace(assignUserID))
+                    {
+                        Log.Debug("Обновление справочника пользователей");
+                        RefreshUsersDictionary(deal.Deal.AssignUser, out assignUserID);
+                        Log.Debug("Новый ID: " + assignUserID);
+                    }
                     if (!string.IsNullOrWhiteSpace(assignUserID))
                         updating.fields.Add("Ответственный New", new string[] { assignUserID });
                 }
@@ -181,10 +187,6 @@ namespace B24AirTableIntegration.Lib.AirTable
                         CreateRecord(tableName, updating);
                     }
                 }
-            }
-            else
-            {
-                Log.Debug("Старая сделка");
             }
         }
 
