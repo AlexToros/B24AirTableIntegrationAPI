@@ -61,7 +61,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public DealResponse GetDeal(string id)
         {
             DealResponse dealResponse = GetEntity<DealResponse>(BitrixSettings.GET_DEAL, id);
-            if (dealResponse.Deal != null && dealResponse.Deal.ASSIGNED_BY_ID != null)
+            if (dealResponse.Deal != null && dealResponse.Deal.LEAD_ID != null)
                 dealResponse.Deal.Lead = GetLead(dealResponse.Deal.LEAD_ID);
             return dealResponse;
         }
@@ -84,7 +84,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         internal string GetLeadEnumUserFieldValue(string FieldName, string Enum_ID)
         {
             if (string.IsNullOrWhiteSpace(Enum_ID)) return null;
-            var ef = Get<UserEnumFieldResponse>(BitrixSettings.GET_USER_ENUM_VALUE,
+            var ef = Get<UserEnumFieldResponse>(BitrixSettings.GET_LEAD_USER_ENUM_VALUE,
                 new Dictionary<string, string> {
                     { "filter[FIELD_NAME]", FieldName}
                 });
@@ -93,6 +93,16 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             return null;
         }
 
-        
+        internal string GetDealEnumUserFieldValue(string FieldName, string Enum_ID)
+        {
+            if (string.IsNullOrWhiteSpace(Enum_ID)) return null;
+            var ef = Get<UserEnumFieldResponse>(BitrixSettings.GET_DEAL_USER_ENUM_VALUE,
+                new Dictionary<string, string> {
+                    { "filter[FIELD_NAME]", FieldName}
+                });
+            if (ef != null && ef.result != null && ef.result.Count > 0 && ef.result[0].LIST != null)
+                return ef.result[0].LIST.FirstOrDefault(x => x.ID == Enum_ID)?.VALUE;
+            return null;
+        }
     }
 }

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Web;
 
@@ -13,12 +16,22 @@ namespace B24AirTableIntegration.Lib.Helpers
         {
             try
             {
-                using (StreamWriter sw = new StreamWriter(@"C:\Test\log.txt", true))
+                var data = Encoding.UTF8.GetBytes(message);
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create("ftp://37.140.192.113/httpdocs/");
+                request.Method = WebRequestMethods.Ftp.AppendFile;
+                request.ContentLength = data.Length;
+                request.Credentials = new NetworkCredential("u0757139", "9fCD9a4_");
+                using (Stream requestStream = request.GetRequestStream())
+                using (var writer = new StreamWriter(requestStream))
                 {
-                    sw.WriteLine($"DEBUG ({DateTime.Now}) THREAD_ID {Thread.CurrentThread.ManagedThreadId} : {message}");
+                    writer.Write(message);
+                }
+                using (var response = request.GetResponse())
+                {
                 }
             }
             catch { }
+            
         }
     }
 }

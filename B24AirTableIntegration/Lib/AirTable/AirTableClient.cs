@@ -76,7 +76,7 @@ namespace B24AirTableIntegration.Lib.AirTable
             if (lead.Lead != null)
             {
                 Log.Debug("Тип лида - " + lead.Lead.Type.ToString());
-                if (lead.Lead.IsValid) return;
+                if (!lead.Lead.IsValid) return;
 
                 var tableName = "Заявки";
                 string AtRecord_ID;
@@ -141,7 +141,7 @@ namespace B24AirTableIntegration.Lib.AirTable
             if (deal.Deal != null)
             {
                 Log.Debug("Тип сделки - " + deal.Deal.Type.ToString());
-                if (deal.Deal.IsValid) return;
+                if (!deal.Deal.IsValid) return;
                 var tableName = "Заявки";
                 
                 var updating = deal.GetUpdatingRecord();
@@ -210,10 +210,10 @@ namespace B24AirTableIntegration.Lib.AirTable
                 case BitrixObjectType.None:
                     newStatus = null;
                     return false;
-                case BitrixObjectType.B2B:
+                case BitrixObjectType.Lead_B2B:
                     typeString = "Deal_B2B";
                     break;
-                case BitrixObjectType.B2C:
+                case BitrixObjectType.Lead_B2C:
                     typeString = "Deal_B2C";
                     break;
             }
@@ -240,8 +240,8 @@ namespace B24AirTableIntegration.Lib.AirTable
                 case BitrixObjectType.None:
                     newStatus = null;
                     return false;
-                case BitrixObjectType.B2B:
-                case BitrixObjectType.B2C:
+                case BitrixObjectType.Lead_B2B:
+                case BitrixObjectType.Lead_B2C:
                     typeString = "Lead";
                     break;
             }

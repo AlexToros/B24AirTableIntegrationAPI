@@ -115,10 +115,9 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 switch (Type)
                 {
                     default:
-                    case BitrixObjectType.None:
                         return null;
-                    case BitrixObjectType.B2B:
-                    case BitrixObjectType.B2C:
+                    case BitrixObjectType.Lead_B2B:
+                    case BitrixObjectType.Lead_B2C:
                         if (string.IsNullOrWhiteSpace(typeName))
                         {
                             typeName = BitrixClient.Instance.GetLeadEnumUserFieldValue("UF_CRM_1540290799", Type_IDs[0].ToString());
@@ -173,7 +172,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         {
             get
             {
-                return (Type != BitrixObjectType.B2C && Type != BitrixObjectType.B2B);
+                return (Type == BitrixObjectType.Lead_B2C || Type == BitrixObjectType.Lead_B2B);
             }
         }
 
