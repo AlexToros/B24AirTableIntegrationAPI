@@ -18,6 +18,7 @@ namespace B24AirTableIntegration.Lib.Helpers
         protected ApiClient(string RootUrl, Dictionary<string, string> Headers, Dictionary<string, string> PermanentParams = null)
         {
             ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             if (PermanentParams != null)
                 this.PermanentParams = PermanentParams;
             else
@@ -45,7 +46,25 @@ namespace B24AirTableIntegration.Lib.Helpers
             Log.Debug(url);
             using (var client = GetClient())
             {
-                result = Encoding.UTF8.GetString(client.DownloadData(url));
+                try
+                {
+                    result = Encoding.UTF8.GetString(client.DownloadData(url));
+                }
+                catch (WebException ex)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    using (Stream s = ex.Response.GetResponseStream())
+                    {
+                        byte[] buffer = new byte[1024];
+                        int length = 1;
+                        while (length > 0)
+                        {
+                            length = s.Read(buffer, 0, 1024);
+                            sb.Append(Encoding.UTF8.GetString(buffer));
+                        }
+                    }
+                    throw new WebException(sb.ToString(), ex, ex.Status, ex.Response);                        
+                }
             }
 
             return result;
@@ -91,8 +110,26 @@ namespace B24AirTableIntegration.Lib.Helpers
             byte[] result;
             using (var client = GetClient())
             {
-                result = client.UploadData(url, method, Encoding.UTF8.GetBytes(content));
-            }
+                try
+                {
+                    result = client.UploadData(url, method, Encoding.UTF8.GetBytes(content));
+                }
+                catch (WebException ex)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    using (Stream s = ex.Response.GetResponseStream())
+                    {
+                        byte[] buffer = new byte[1024];
+                        int length = 1;
+                        while (length > 0)
+                        {
+                            length = s.Read(buffer, 0, 1024);
+                            sb.Append(Encoding.UTF8.GetString(buffer));
+                        }
+                    }
+                    throw new WebException(sb.ToString(), ex, ex.Status, ex.Response);
+                }
+        }
             return Encoding.UTF8.GetString(result);
         }
 

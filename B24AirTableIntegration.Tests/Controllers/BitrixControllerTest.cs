@@ -64,7 +64,7 @@ namespace B24AirTableIntegration.Tests.Controllers
         {
             var client = AirTableClient.Instance;
 
-            var id = client.GetFirstRecordIDTest("Заявки", "Lead_ID='2'");
+            var id = client.GetFirstRecordIDTest("Заявки333", "Lead_ID='2'");
             Assert.AreEqual(id, "recm5IlMx1vKadkFb");
         }
     }

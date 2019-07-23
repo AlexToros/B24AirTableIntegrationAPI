@@ -269,7 +269,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             if (Deal.DATE_CREATE.HasValue && Deal.DATE_CREATE.Value != DateTime.MinValue)
                 record.fields.Add("Дата обращения", Deal.DATE_CREATE.Value.ToString("yyyy-MM-dd"));
             if (Deal.COMMENTS != null)
-                record.fields.Add("Основная информация", Regex.Replace(Deal.COMMENTS, "<[^>]+>", string.Empty));
+                record.fields.Add("Основная информация", Regex.Replace(Deal.COMMENTS, "<[^>]+>", " "));
 
             if(Deal.Contact != null && !string.IsNullOrWhiteSpace(Deal.Contact.Contact.AirTableString))
                 record.fields.Add("Клиент", Deal.Contact.Contact.AirTableString);

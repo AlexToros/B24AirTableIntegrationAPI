@@ -31,7 +31,7 @@ namespace B24AirTableIntegration.Controllers
             }
             catch (Exception ex)
             {
-                Log.Debug(ex.ToString());
+                Log.Debug($"{ex}\r\nВнутреннее исключение:{ex.InnerException}");
             }
         }
 
@@ -54,7 +54,7 @@ namespace B24AirTableIntegration.Controllers
             }
             catch (Exception ex)
             {
-                Log.Debug(ex.ToString());
+                Log.Debug($"{ex}\r\nВнутреннее исключение:{ex.InnerException}");
             }
         }
         // GET api/<controller>

@@ -210,10 +210,11 @@ namespace B24AirTableIntegration.Lib.AirTable
                 case BitrixObjectType.None:
                     newStatus = null;
                     return false;
-                case BitrixObjectType.Lead_B2B:
+                case BitrixObjectType.Deal_B2B:
+                case BitrixObjectType.Deal_B2B2:
                     typeString = "Deal_B2B";
                     break;
-                case BitrixObjectType.Lead_B2C:
+                case BitrixObjectType.Deal_B2C:
                     typeString = "Deal_B2C";
                     break;
             }

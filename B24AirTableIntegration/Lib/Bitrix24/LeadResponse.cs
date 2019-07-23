@@ -296,7 +296,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             if (Lead.DATE_CREATE.HasValue && Lead.DATE_CREATE.Value != DateTime.MinValue)
                 record.fields.Add("Дата обращения", Lead.DATE_CREATE.Value.ToString("yyyy-MM-dd"));
             if (Lead.COMMENTS != null)
-                record.fields.Add("Основная информация", Regex.Replace(Lead.COMMENTS, "<[^>]+>", string.Empty));
+                record.fields.Add("Основная информация", Regex.Replace(Lead.COMMENTS, "<[^>]+>", " "));
 
             if (!string.IsNullOrEmpty(Lead.AirTableClientString))
                 record.fields.Add("Клиент", Lead.AirTableClientString);
