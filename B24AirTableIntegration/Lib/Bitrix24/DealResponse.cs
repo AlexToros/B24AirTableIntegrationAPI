@@ -134,7 +134,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                     case BitrixObjectType.Deal_B2C:
                         if (string.IsNullOrWhiteSpace(typeName))
                         {
-                            typeName = BitrixClient.Instance.GetDealEnumUserFieldValue("UF_CRM_5BCF50BA94A18", Type_IDs[0].ToString());
+                            typeName = BitrixClient.Instance.GetDealEnumUserFieldValue("UF_CRM_5BCF50BA94A18", Type_IDs.FirstOrDefault(x => x > 0).ToString());
                         }
                         return typeName;
                 }
@@ -150,7 +150,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 {
                     try
                     {
-                        return (BitrixObjectType)Type_IDs[0];
+                        return (BitrixObjectType)Type_IDs.FirstOrDefault(x => x > 0);
                     }
                     catch
                     {

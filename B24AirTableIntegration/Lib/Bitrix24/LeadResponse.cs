@@ -120,7 +120,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                     case BitrixObjectType.Lead_B2C:
                         if (string.IsNullOrWhiteSpace(typeName))
                         {
-                            typeName = BitrixClient.Instance.GetLeadEnumUserFieldValue("UF_CRM_1540290799", Type_IDs[0].ToString());
+                            typeName = BitrixClient.Instance.GetLeadEnumUserFieldValue("UF_CRM_1540290799", Type_IDs.FirstOrDefault(x => x > 0).ToString());
                         }
                         return typeName;
                 }
@@ -161,7 +161,10 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 {
                     if (PhoneString != null)
                         return $"{FIO} ({PhoneString})";
-                    return FIO;
+                }
+                else {
+                    if (PhoneString != null)
+                        return $"{PhoneString}";
                 }
                 return null;
             }
@@ -185,7 +188,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 {
                     try
                     {
-                        return (BitrixObjectType)Type_IDs[0];
+                        return (BitrixObjectType)Type_IDs.FirstOrDefault(x => x > 0);
                     }
                     catch
                     {
