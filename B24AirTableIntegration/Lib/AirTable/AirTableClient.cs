@@ -78,9 +78,6 @@ namespace B24AirTableIntegration.Lib.AirTable
         {
             if (lead.Lead != null)
             {
-                Log.Debug("Тип лида - " + lead.Lead.Type.ToString());
-                if (!lead.Lead.IsValid) return;
-
                 var tableName = "Заявки";
                 string AtRecord_ID;
                 if (IsDealExist(lead.Lead.ID))
@@ -125,30 +122,10 @@ namespace B24AirTableIntegration.Lib.AirTable
             }
         }
 
-        private void RefreshUsersDictionary(UserResponse assignUser, out string id)
-        {
-            if (assignUser.Users != null && assignUser.Users.Count > 0)
-            {
-                CreationResponse resp = CreateRecord<CreationResponse, UpdatingRecord>("Пользователи B24", new UpdatingRecord
-                {
-                    fields = new Dictionary<string, object>
-                    {
-                        { "Name", assignUser.Users[0].NAME },
-                        { "ID B24", assignUser.Users[0].ID }
-                    }
-                });
-                id = resp.id;
-            }
-            else
-                id = null;
-        }
-
         public void UpdateOrCreate(DealResponse deal)
         {
             if (deal.Deal != null)
             {
-                Log.Debug("Тип сделки - " + deal.Deal.Type.ToString());
-                if (!deal.Deal.IsValid) return;
                 var tableName = "Заявки";
                 
                 var updating = deal.GetUpdatingRecord();
@@ -198,6 +175,34 @@ namespace B24AirTableIntegration.Lib.AirTable
                     }
                 }
             }
+        }
+        
+        public void DeleteIfExist(LeadResponse lead)
+        {
+            DeleteAllRecords("Заявки", $"Lead_ID='{lead.Lead.ID}'");
+        }
+
+        public void DeleteIfExist(DealResponse deal)
+        {
+            DeleteAllRecords("Заявки", $"Deal_ID='{deal.Deal.ID}'");
+        }
+
+        private void RefreshUsersDictionary(UserResponse assignUser, out string id)
+        {
+            if (assignUser.Users != null && assignUser.Users.Count > 0)
+            {
+                CreationResponse resp = CreateRecord<CreationResponse, UpdatingRecord>("Пользователи B24", new UpdatingRecord
+                {
+                    fields = new Dictionary<string, object>
+                    {
+                        { "Name", assignUser.Users[0].NAME },
+                        { "ID B24", assignUser.Users[0].ID }
+                    }
+                });
+                id = resp.id;
+            }
+            else
+                id = null;
         }
 
         private bool IsDealExist(string Lead_ID)
@@ -278,6 +283,20 @@ namespace B24AirTableIntegration.Lib.AirTable
         private void CreateRecord<T>(string tableName, T updatingRecord)
         {
             Post($@"{Uri.EscapeUriString(tableName)}", updatingRecord);
+        }
+
+        private void DeleteAllRecords(string tableName, string filter)
+        {
+            string ID;
+            while ((ID = GetFirstRecordID(tableName, filter)) != null)
+            {
+                DeleteRecord(tableName, ID);
+            }
+        }
+
+        private void DeleteRecord(string tableName, string recordID)
+        {
+            Delete($@"{Uri.EscapeUriString(tableName)}/{recordID}");
         }
 
         private string GetFirstRecordID(string tableName, string filter)

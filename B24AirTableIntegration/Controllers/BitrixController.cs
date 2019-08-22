@@ -25,7 +25,13 @@ namespace B24AirTableIntegration.Controllers
 
                 var Lead = Bitrix.GetLead(response.data.fields.ID);
                 if (Lead.Lead.DATE_CREATE > new DateTime(2019, 7, 2, 13, 11, 0))
-                    AirTable.UpdateOrCreate(Lead);
+                {
+
+                    if (Lead.Lead.IsValid)
+                        AirTable.UpdateOrCreate(Lead);
+                    else
+                        AirTable.DeleteIfExist(Lead);
+                }
                 else
                     Log.Debug("Старый лид");
             }
@@ -48,7 +54,10 @@ namespace B24AirTableIntegration.Controllers
 
                 var Deal = Bitrix.GetDeal(response.data.fields.ID);
                 if (Deal.Deal.DATE_CREATE > new DateTime(2019, 7, 2, 13, 11, 0))
-                    AirTable.UpdateOrCreate(Deal);
+                {
+                    if (Deal.Deal.IsValid)
+                        AirTable.UpdateOrCreate(Deal);
+                }
                 else
                     Log.Debug("Старая сделка");
             }

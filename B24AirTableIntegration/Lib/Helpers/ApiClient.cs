@@ -100,6 +100,11 @@ namespace B24AirTableIntegration.Lib.Helpers
             return UploadContent(EndPoint, content, parameters);
         }
 
+        protected string Delete(string EndPoint, Dictionary<string, string> parameters = null)
+        {
+            return UploadContent(EndPoint, null, parameters, "DELETE");
+        }
+
         private string UploadContent(string EndPoint, string content, Dictionary<string, string> parameters = null, string method = "POST")
         {
             string url = $"{Path.Combine(RootUrl, EndPoint).Replace('\\', '/').Trim('/')}?{GetTotalParamString(parameters)}".Trim('?');
@@ -107,12 +112,13 @@ namespace B24AirTableIntegration.Lib.Helpers
             Log.Debug(url);
             Log.Debug(content);
             
-            byte[] result;
+            byte[] result = string.IsNullOrWhiteSpace(content) ? new byte[0] : Encoding.UTF8.GetBytes(content);
+            
             using (var client = GetClient())
             {
                 try
                 {
-                    result = client.UploadData(url, method, Encoding.UTF8.GetBytes(content));
+                    result = client.UploadData(url, method, result);
                 }
                 catch (WebException ex)
                 {
@@ -129,7 +135,7 @@ namespace B24AirTableIntegration.Lib.Helpers
                     }
                     throw new WebException(sb.ToString(), ex, ex.Status, ex.Response);
                 }
-        }
+            }
             return Encoding.UTF8.GetString(result);
         }
 
