@@ -9,11 +9,14 @@ using Newtonsoft.Json;
 using B24AirTableIntegration.Lib.Bitrix24;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace B24AirTableIntegration.Lib.AirTable
 {
     public class AirTableClient : ApiClient
     {
+        object _leadLocker = new object();
+        object _dealLocker = new object();
         private static object syncRoot = new object();
         private static AirTableClient client;
 
@@ -80,7 +83,7 @@ namespace B24AirTableIntegration.Lib.AirTable
 
                 var tableName = "Заявки";
                 string AtRecord_ID;
-                if (IsDealExist(lead.Lead.ID, out AtRecord_ID))
+                if (IsDealExist(lead.Lead.ID))
                     return;
 
                 var updating = lead.GetUpdatingRecord();
@@ -106,14 +109,18 @@ namespace B24AirTableIntegration.Lib.AirTable
                         updating.fields.Add("Ответственный New", new string[] { assignUserID });
                 }
 
-                if (AtRecord_ID != null)
+                lock (_leadLocker)
                 {
-                    UpdateRecord(tableName, AtRecord_ID, updating);
-                }
-                else
-                {
-                    updating.fields.Add("Lead_ID", lead.Lead.ID);
-                    CreateRecord(tableName, updating);
+                    AtRecord_ID = GetFirstRecordID(tableName, $"Lead_ID='{lead.Lead.ID}'");
+                    if (AtRecord_ID != null)
+                    {
+                        UpdateRecord(tableName, AtRecord_ID, updating);
+                    }
+                    else
+                    {
+                        updating.fields.Add("Lead_ID", lead.Lead.ID);
+                        CreateRecord(tableName, updating);
+                    }
                 }
             }
         }
@@ -167,8 +174,8 @@ namespace B24AirTableIntegration.Lib.AirTable
                         updating.fields.Add("Ответственный New", new string[] { assignUserID });
                 }
 
+                
                 var AtRecord_ID = GetFirstRecordID(tableName, $"Deal_ID='{deal.Deal.ID}'");
-
                 if (AtRecord_ID != null)
                 {
                     UpdateRecord(tableName, AtRecord_ID, updating);
@@ -176,30 +183,27 @@ namespace B24AirTableIntegration.Lib.AirTable
                 else
                 {
                     updating.fields.Add("Deal_ID", deal.Deal.ID);
-                    AtRecord_ID = GetFirstRecordID(tableName, $"Lead_ID='{deal.Deal.LEAD_ID}'");
-                    if (AtRecord_ID != null)
+                    lock (_dealLocker)
                     {
-                        UpdateRecord(tableName, AtRecord_ID, updating);
-                    }
-                    else
-                    {
-                        updating.fields.Add("Lead_ID", deal.Deal.LEAD_ID);
-                        CreateRecord(tableName, updating);
+                        AtRecord_ID = GetFirstRecordID(tableName, $"Lead_ID='{deal.Deal.LEAD_ID}'");
+                        if (AtRecord_ID != null)
+                        {
+                            UpdateRecord(tableName, AtRecord_ID, updating);
+                        }
+                        else
+                        {
+                            updating.fields.Add("Lead_ID", deal.Deal.LEAD_ID);
+                            CreateRecord(tableName, updating);
+                        }
                     }
                 }
             }
         }
 
-        private bool IsDealExist(string Lead_ID, out string recordID)
+        private bool IsDealExist(string Lead_ID)
         {
-            recordID = GetFirstRecordID("Заявки", $"AND(Lead_ID='{Lead_ID}',LEN(Deal_ID)>0)");
-            if (recordID != null)
-                return true;
-            else
-            {
-                recordID = GetFirstRecordID("Заявки", $"Lead_ID='{Lead_ID}'");
-                return false;
-            }
+            var recordID = GetFirstRecordID("Заявки", $"AND(Lead_ID='{Lead_ID}',LEN(Deal_ID)>0)");
+            return recordID != null;
         }
 
         private bool TryGetNewDealStatus(BitrixObjectType type, string status, out string newStatus)
