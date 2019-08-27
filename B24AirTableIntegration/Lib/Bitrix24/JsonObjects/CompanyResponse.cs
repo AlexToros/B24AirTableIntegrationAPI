@@ -74,6 +74,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
 
     public class CompanyResponse
     {
+        [Newtonsoft.Json.JsonProperty("result")]
         public Company Company { get; set; }
         public Time time { get; set; }
     }

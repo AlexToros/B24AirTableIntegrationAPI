@@ -66,15 +66,8 @@ namespace B24AirTableIntegration.Tests.Controllers
             BitrixClient Bitrix = BitrixClient.Instance;
             AirTableClient AirTable = AirTableClient.Instance;
 
-            var Lead = Bitrix.GetLead("23859");
-            if (Lead.Lead.DATE_CREATE > new DateTime(2019, 7, 2, 13, 11, 0))
-            {
-
-                if (Lead.Lead.IsValid)
-                    AirTable.UpdateOrCreate(Lead);
-                else
-                    AirTable.DeleteIfExist(Lead);
-            }
+            var d = Bitrix.GetDeal("1489");
+            string s = d.Deal.AirTableClientString;
         }
 
         [TestMethod]
