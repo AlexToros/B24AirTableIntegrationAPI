@@ -3,6 +3,7 @@ using System.Text;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using B24AirTableIntegration.Lib.AirTable;
+using B24AirTableIntegration.Lib.Bitrix24;
 
 namespace B24AirTableIntegration.Tests.Controllers
 {
@@ -62,10 +63,18 @@ namespace B24AirTableIntegration.Tests.Controllers
         [TestMethod]
         public void TestGettingID()
         {
-            var client = AirTableClient.Instance;
+            BitrixClient Bitrix = BitrixClient.Instance;
+            AirTableClient AirTable = AirTableClient.Instance;
 
-            var id = client.GetFirstRecordIDTest("Заявки333", "Lead_ID='2'");
-            Assert.AreEqual(id, "recm5IlMx1vKadkFb");
+            var Lead = Bitrix.GetLead("23859");
+            if (Lead.Lead.DATE_CREATE > new DateTime(2019, 7, 2, 13, 11, 0))
+            {
+
+                if (Lead.Lead.IsValid)
+                    AirTable.UpdateOrCreate(Lead);
+                else
+                    AirTable.DeleteIfExist(Lead);
+            }
         }
     }
 }
