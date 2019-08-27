@@ -76,5 +76,41 @@ namespace B24AirTableIntegration.Tests.Controllers
                     AirTable.DeleteIfExist(Lead);
             }
         }
+
+        [TestMethod]
+        public void TestAirTableClientStringBuilding()
+        {
+            LeadResponse leadResponse = new LeadResponse();
+            Lead lead = new Lead();
+            leadResponse.Lead = lead;
+            ContactResponse contactResponse = new ContactResponse();
+            Contact contact = new Contact();
+            contactResponse.Contact = contact;
+            DealResponse dealResponse = new DealResponse();
+            Deal deal = new Deal();
+            dealResponse.Deal = deal;
+            CompanyResponse companyResponse = new CompanyResponse();
+            Company company = new Company();
+            companyResponse.Company = company;
+
+            Assert.IsTrue(string.IsNullOrEmpty(deal.AirTableClientString));
+            Assert.IsTrue(string.IsNullOrEmpty(lead.AirTableClientString));
+
+            lead.NAME = "Alex";
+            lead.PHONE = new List<PHONE> { new PHONE() { VALUE = "123" } };
+
+            Assert.AreEqual(lead.AirTableClientString, "Alex (123)");
+
+            deal.Contact = contactResponse;
+            contact.NAME = "Alex";
+            contact.PHONE = new List<PHONE> { new PHONE { VALUE = "123" } };
+
+            Assert.AreEqual(deal.AirTableClientString, "Alex (123)");
+
+            deal.Company = companyResponse;
+            company.TITLE = "Company";
+
+            Assert.AreEqual(deal.AirTableClientString, "Company Alex (123)");
+        }
     }
 }

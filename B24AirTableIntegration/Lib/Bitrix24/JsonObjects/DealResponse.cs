@@ -80,6 +80,26 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             }
         }
 
+        private CompanyResponse company = null;
+        [Newtonsoft.Json.JsonIgnore]
+        public CompanyResponse Company
+        {
+            get
+            {
+                if (company == null)
+                {
+                    if (string.IsNullOrWhiteSpace(COMPANY_ID) || COMPANY_ID == "0")
+                        return null;
+                    company = BitrixClient.Instance.GetCompany(COMPANY_ID);
+                }
+                return company;
+            }
+            set
+            {
+                company = value;
+            }
+        }
+
         private UserResponse assignUser = null;
         [Newtonsoft.Json.JsonIgnore]
         public UserResponse AssignUser
@@ -248,6 +268,22 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         {
             get => $@"https://kvikroom.bitrix24.ru/crm/deal/details/{ID}/";
         }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public string AirTableClientString
+        {
+            get
+            {
+                string company = Company?.Company?.TITLE;
+                string contact = Contact?.Contact?.AirTableString;
+                if (string.IsNullOrEmpty(contact))
+                    contact = Lead?.Lead?.AirTableClientString;
+
+                string res = $"{company} {contact}".Trim();
+
+                return string.IsNullOrWhiteSpace(res) ? null : res;
+            }
+        }
     }
 
     public class DealResponse
@@ -269,15 +305,9 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             if (Deal.DATE_CREATE.HasValue && Deal.DATE_CREATE.Value != DateTime.MinValue)
                 record.fields.Add("Дата обращения", Deal.DATE_CREATE.Value.ToString("yyyy-MM-dd"));
             if (Deal.COMMENTS != null)
-                record.fields.Add("Основная информация", Regex.Replace(Deal.COMMENTS, "<[^>]+>", " "));
-
-            if(Deal.Contact != null && !string.IsNullOrWhiteSpace(Deal.Contact.Contact.AirTableString))
-                record.fields.Add("Клиент", Deal.Contact.Contact.AirTableString);
-            else if (Deal.Lead != null && Deal.Lead.Lead != null && !string.IsNullOrEmpty(Deal.Lead.Lead.AirTableClientString))
-                record.fields.Add("Клиент", Deal.Lead.Lead.AirTableClientString);
-            else if (Deal.Lead != null && Deal.Lead.Lead != null && Deal.Lead.Lead.Contact != null && Deal.Lead.Lead.Contact.Contact != null && !string.IsNullOrWhiteSpace(Deal.Lead.Lead.Contact.Contact.AirTableString))
-                record.fields.Add("Клиент", Deal.Lead.Lead.Contact.Contact.AirTableString);
-
+                record.fields.Add("Основная информация", Regex.Replace(Deal.COMMENTS, "<[^>]+>|&nbsp;", " "));
+            if (Deal.AirTableClientString != null)
+                record.fields.Add("Клиент", Deal.AirTableClientString);
             if (Deal.URL != null)
                 record.fields.Add("Клиент - Bitrix24", Deal.URL);
             if (Deal.PeopleCount != 0)

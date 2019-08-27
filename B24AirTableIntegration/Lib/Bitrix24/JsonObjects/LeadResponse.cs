@@ -166,7 +166,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                     if (PhoneString != null)
                         return $"{PhoneString}";
                 }
-                return null;
+                return Contact?.Contact?.AirTableString;
             }
         }
 
@@ -299,13 +299,9 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             if (Lead.DATE_CREATE.HasValue && Lead.DATE_CREATE.Value != DateTime.MinValue)
                 record.fields.Add("Дата обращения", Lead.DATE_CREATE.Value.ToString("yyyy-MM-dd"));
             if (Lead.COMMENTS != null)
-                record.fields.Add("Основная информация", Regex.Replace(Lead.COMMENTS, "<[^>]+>", " "));
-
+                record.fields.Add("Основная информация", Regex.Replace(Lead.COMMENTS, "<[^>]+>|&nbsp;", " "));
             if (!string.IsNullOrEmpty(Lead.AirTableClientString))
                 record.fields.Add("Клиент", Lead.AirTableClientString);
-            else if (Lead.Contact != null && Lead.Contact.Contact != null && !string.IsNullOrWhiteSpace(Lead.Contact.Contact.AirTableString))
-                record.fields.Add("Клиент", Lead.Contact.Contact.AirTableString);
-
             if (Lead.URL != null)
                 record.fields.Add("Клиент - Bitrix24", Lead.URL);
             if (Lead.PeopleCount != 0)

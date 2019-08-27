@@ -127,9 +127,13 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             {
                 if (FIO != null)
                 {
-                    if(PhoneString != null)
+                    if (PhoneString != null)
                         return $"{FIO} ({PhoneString})";
-                    return FIO;
+                }
+                else
+                {
+                    if (PhoneString != null)
+                        return $"{PhoneString}";
                 }
                 return null;
             }

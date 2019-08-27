@@ -37,14 +37,17 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             base(ConfigurationManager.AppSettings["BitrixUrl"], null)
         {
         }
-
+        
         public LeadResponse GetLead(string id)
         {
             LeadResponse leadResponse = GetEntity<LeadResponse>(BitrixSettings.GET_LEAD, id);
-            if (leadResponse.Lead != null && leadResponse.Lead.CONTACT_ID != null)
-                leadResponse.Lead.Contact = GetContact(leadResponse.Lead.CONTACT_ID);
-            if (leadResponse.Lead != null && leadResponse.Lead.ASSIGNED_BY_ID != null)
-                leadResponse.Lead.AssignUser = GetUser(leadResponse.Lead.ASSIGNED_BY_ID);
+            if (leadResponse.Lead != null)
+            {
+                if (leadResponse.Lead.CONTACT_ID != null)
+                    leadResponse.Lead.Contact = GetContact(leadResponse.Lead.CONTACT_ID);
+                if (leadResponse.Lead.ASSIGNED_BY_ID != null)
+                    leadResponse.Lead.AssignUser = GetUser(leadResponse.Lead.ASSIGNED_BY_ID);
+            }
             return leadResponse;
         }
 
@@ -58,11 +61,21 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             return GetEntity<ContactResponse>(BitrixSettings.GET_CONTACT, id);
         }
 
+        internal CompanyResponse GetCompany(string id)
+        {
+            return GetEntity<CompanyResponse>(BitrixSettings.GET_COMPANY, id);
+        }
+
         public DealResponse GetDeal(string id)
         {
             DealResponse dealResponse = GetEntity<DealResponse>(BitrixSettings.GET_DEAL, id);
-            if (dealResponse.Deal != null && dealResponse.Deal.LEAD_ID != null)
-                dealResponse.Deal.Lead = GetLead(dealResponse.Deal.LEAD_ID);
+            if (dealResponse.Deal != null)
+            {
+                if (dealResponse.Deal.LEAD_ID != null)
+                    dealResponse.Deal.Lead = GetLead(dealResponse.Deal.LEAD_ID);
+                if (dealResponse.Deal.COMPANY_ID != null)
+                    dealResponse.Deal.Company = GetCompany(dealResponse.Deal.COMPANY_ID);
+            }
             return dealResponse;
         }
 
@@ -104,5 +117,6 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 return ef.result[0].LIST.FirstOrDefault(x => x.ID == Enum_ID)?.VALUE;
             return null;
         }
+
     }
 }
