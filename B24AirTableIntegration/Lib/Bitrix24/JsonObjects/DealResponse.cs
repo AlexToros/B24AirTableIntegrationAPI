@@ -80,6 +80,24 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             }
         }
 
+        private TimeLineResponse timeLine = null;
+        [Newtonsoft.Json.JsonIgnore]
+        public TimeLineResponse TimeLine
+        {
+            get
+            {
+                if (timeLine == null)
+                {
+                    timeLine = BitrixClient.Instance.GetTimeLine(ID, "deal");
+                }
+                return timeLine;
+            }
+            set
+            {
+                timeLine = value;
+            }
+        }
+
         private CompanyResponse company = null;
         [Newtonsoft.Json.JsonIgnore]
         public CompanyResponse Company
@@ -322,6 +340,8 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 record.fields.Add("Тип клиента", Deal.ClientType);
             if (Deal.TypeName != null)
                 record.fields.Add("Тип Лида/Сделки", Deal.TypeName);
+            if (Deal.TimeLine != null && Deal.TimeLine.LastComment != null)
+                record.fields.Add("Комментарий по результату", Deal.TimeLine.LastComment);
 
             return record;
         }

@@ -66,8 +66,8 @@ namespace B24AirTableIntegration.Tests.Controllers
             BitrixClient Bitrix = BitrixClient.Instance;
             AirTableClient AirTable = AirTableClient.Instance;
 
-            var d = Bitrix.GetDeal("1489");
-            string s = d.Deal.AirTableClientString;
+            var d = Bitrix.GetDeal("1465");
+            AirTable.UpdateOrCreate(d);
         }
 
         [TestMethod]

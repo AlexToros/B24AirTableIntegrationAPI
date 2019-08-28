@@ -122,6 +122,35 @@ namespace B24AirTableIntegration.Lib.AirTable
             }
         }
 
+        internal void Update(CommentResponse comment)
+        {
+            if (comment.Comment != null)
+            {
+                string filter;
+                switch (comment.Comment.ENTITY_TYPE)
+                {
+                    case "deal":
+                        filter = $"Deal_ID='{comment.Comment.ENTITY_ID}'";
+                        break;
+                    case "lead":
+                        filter = $"Lead_ID='{comment.Comment.ENTITY_ID}'";
+                        break;
+                    default:
+                        return;
+                }
+
+                string RecordID = GetFirstRecordID("Заявки", filter);
+                if (RecordID == null) return;
+                UpdatingRecord record = new UpdatingRecord();
+                record.fields = new Dictionary<string, object>
+                {
+                    { "Комментарий по результату", comment.Comment.ToString() }
+                };
+
+                UpdateRecord("Заявки", RecordID, record);
+            }
+        }
+
         public void UpdateOrCreate(DealResponse deal)
         {
             if (deal.Deal != null)

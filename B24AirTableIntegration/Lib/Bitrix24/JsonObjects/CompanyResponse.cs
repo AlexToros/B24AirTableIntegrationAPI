@@ -24,8 +24,8 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public object CURRENCY_ID { get; set; }
         public object EMPLOYEES { get; set; }
         public string COMMENTS { get; set; }
-        public DateTime DATE_CREATE { get; set; }
-        public DateTime DATE_MODIFY { get; set; }
+        public DateTime? DATE_CREATE { get; set; }
+        public DateTime? DATE_MODIFY { get; set; }
         public string OPENED { get; set; }
         public string IS_MY_COMPANY { get; set; }
         public object ORIGINATOR_ID { get; set; }
@@ -60,7 +60,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public string UF_CRM_5D0CA4461AD19 { get; set; }
         public string UF_CRM_5D10DD656A314 { get; set; }
         public string UF_CRM_5D10DD657CE37 { get; set; }
-        public DateTime UF_CRM_5D10DD6587F96 { get; set; }
+        public DateTime? UF_CRM_5D10DD6587F96 { get; set; }
         public string UF_CRM_5D10DD6594617 { get; set; }
         public string UF_CRM_5D1C56FC97995 { get; set; }
         public string UF_CRM_5D1C56FCBABEA { get; set; }

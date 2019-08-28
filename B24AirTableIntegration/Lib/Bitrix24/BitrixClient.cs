@@ -43,12 +43,27 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             LeadResponse leadResponse = GetEntity<LeadResponse>(BitrixSettings.GET_LEAD, id);
             if (leadResponse.Lead != null)
             {
-                if (leadResponse.Lead.CONTACT_ID != null)
+                if (leadResponse.Lead.CONTACT_ID != null && leadResponse.Lead.CONTACT_ID != "0")
                     leadResponse.Lead.Contact = GetContact(leadResponse.Lead.CONTACT_ID);
-                if (leadResponse.Lead.ASSIGNED_BY_ID != null)
+                if (leadResponse.Lead.ASSIGNED_BY_ID != null && leadResponse.Lead.ASSIGNED_BY_ID != "0")
                     leadResponse.Lead.AssignUser = GetUser(leadResponse.Lead.ASSIGNED_BY_ID);
+                leadResponse.Lead.TimeLine = GetTimeLine(id, "lead");
             }
             return leadResponse;
+        }
+
+        public DealResponse GetDeal(string id)
+        {
+            DealResponse dealResponse = GetEntity<DealResponse>(BitrixSettings.GET_DEAL, id);
+            if (dealResponse.Deal != null)
+            {
+                if (dealResponse.Deal.LEAD_ID != null && dealResponse.Deal.LEAD_ID != "0")
+                    dealResponse.Deal.Lead = GetLead(dealResponse.Deal.LEAD_ID);
+                if (dealResponse.Deal.COMPANY_ID != null && dealResponse.Deal.COMPANY_ID != "0")
+                    dealResponse.Deal.Company = GetCompany(dealResponse.Deal.COMPANY_ID);
+                dealResponse.Deal.TimeLine = GetTimeLine(id, "deal");
+            }
+            return dealResponse;
         }
 
         public UserResponse GetUser(string id)
@@ -66,22 +81,23 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             return GetEntity<CompanyResponse>(BitrixSettings.GET_COMPANY, id);
         }
 
-        public DealResponse GetDeal(string id)
+        internal CommentResponse GetComment(string id)
         {
-            DealResponse dealResponse = GetEntity<DealResponse>(BitrixSettings.GET_DEAL, id);
-            if (dealResponse.Deal != null)
-            {
-                if (dealResponse.Deal.LEAD_ID != null)
-                    dealResponse.Deal.Lead = GetLead(dealResponse.Deal.LEAD_ID);
-                if (dealResponse.Deal.COMPANY_ID != null)
-                    dealResponse.Deal.Company = GetCompany(dealResponse.Deal.COMPANY_ID);
-            }
-            return dealResponse;
+            return GetEntity<CommentResponse>(BitrixSettings.GET_COMMENT, id);
         }
 
         private T GetEntity<T>(string method, string id)
         {
             return Get<T>(method, new Dictionary<string, string> { { "id", id } });
+        }
+
+        internal TimeLineResponse GetTimeLine(string id, string entityType)
+        {
+            if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(entityType)) return null;
+            return Get<TimeLineResponse>(BitrixSettings.GET_TIME_LINE, new Dictionary<string, string> {
+                { "filter[ENTITY_ID]", id},
+                { "filter[ENTITY_TYPE]", entityType}
+            });
         }
 
         internal string GetEnumFieldValue(string FieldName, string ID)
@@ -91,7 +107,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             {
                 { "entity_id", FieldName}
             });
-            return items.Items.FirstOrDefault(x => x.STATUS_ID == ID)?.NAME;
+            return items.Items?.FirstOrDefault(x => x.STATUS_ID == ID)?.NAME;
         }
 
         internal string GetLeadEnumUserFieldValue(string FieldName, string Enum_ID)
@@ -105,6 +121,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 return ef.result[0].LIST.FirstOrDefault(x => x.ID == Enum_ID)?.VALUE;
             return null;
         }
+
 
         internal string GetDealEnumUserFieldValue(string FieldName, string Enum_ID)
         {

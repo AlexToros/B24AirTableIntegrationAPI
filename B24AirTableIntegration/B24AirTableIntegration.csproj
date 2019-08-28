@@ -141,7 +141,8 @@
     <Compile Include="Lib\Bitrix24\BitrixObjectType.cs" />
     <Compile Include="Lib\Bitrix24\JsonObjects\CompanyResponse.cs" />
     <Compile Include="Lib\Bitrix24\JsonObjects\ContactResponse.cs" />
-    <Compile Include="Lib\Bitrix24\EnumFieldItems.cs" />
+    <Compile Include="Lib\Bitrix24\JsonObjects\EnumFieldItems.cs" />
+    <Compile Include="Lib\Bitrix24\JsonObjects\TimeLineResponse.cs" />
     <Compile Include="Lib\Bitrix24\JsonObjects\UserEnumFieldResponse.cs" />
     <Compile Include="Lib\Bitrix24\JsonObjects\UserResponse.cs" />
     <Compile Include="Lib\Helpers\ApiClient.cs" />

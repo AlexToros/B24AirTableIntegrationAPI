@@ -66,6 +66,47 @@ namespace B24AirTableIntegration.Controllers
                 Log.Debug($"{ex}\r\nВнутреннее исключение:{ex.InnerException}");
             }
         }
+
+        [HttpPost]
+        [Route("bitrix/oncommentadd")]
+        public void OnCommentAdd([FromBody]EventResponse response)
+        {
+            try
+            {
+                BitrixClient Bitrix = BitrixClient.Instance;
+                AirTableClient AirTable = AirTableClient.Instance;
+
+                var Comment = Bitrix.GetComment(response.data.fields.ID);
+
+                AirTable.Update(Comment);
+            }
+            catch (Exception ex)
+            {
+                Log.Debug($"{ex}\r\nВнутреннее исключение:{ex.InnerException}");
+            }
+        }
+
+        [HttpPost]
+        [Route("bitrix/oncommentupdate")]
+        public void OnCommentUpdate([FromBody]EventResponse response)
+        {
+            try
+            {
+                BitrixClient Bitrix = BitrixClient.Instance;
+                AirTableClient AirTable = AirTableClient.Instance;
+
+                var Comment = Bitrix.GetComment(response.data.fields.ID);
+                var OtherComments = Bitrix.GetTimeLine(Comment.Comment.ENTITY_ID.ToString(), Comment.Comment.ENTITY_TYPE);
+
+                if (Comment.Comment == OtherComments.Entries.OrderByDescending(c => c.CREATED).FirstOrDefault())
+                    AirTable.Update(Comment);
+            }
+            catch (Exception ex)
+            {
+                Log.Debug($"{ex}\r\nВнутреннее исключение:{ex.InnerException}");
+            }
+        }
+
         // GET api/<controller>
         public IEnumerable<string> Get()
         {

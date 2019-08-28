@@ -15,6 +15,8 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public const string GET_LEAD_USER_ENUM_VALUE = "crm.lead.userfield.list";
         public const string GET_DEAL_USER_ENUM_VALUE = "crm.deal.userfield.list";
         public const string GET_COMPANY = "crm.company.get";
+        public const string GET_TIME_LINE = "crm.timeline.comment.list";
+        public const string GET_COMMENT = "crm.timeline.comment.get";
 
         public const string SOURCE_LIST_ID = "SOURCE";
         public const string CONTACT_TYPE_LIST_ID = "CONTACT_TYPE";
