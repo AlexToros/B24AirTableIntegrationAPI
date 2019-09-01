@@ -1,4 +1,5 @@
 ﻿using B24AirTableIntegration.Lib.AirTable;
+using B24AirTableIntegration.Lib.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,6 +44,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public object UTM_CONTENT { get; set; }
         public object UTM_TERM { get; set; }
         public string UF_CRM_1539697408 { get; set; }
+        [Newtonsoft.Json.JsonConverter(typeof(ListOrBooleanConverter))]
         [Newtonsoft.Json.JsonProperty("UF_CRM_5BCF50BA94A18")]
         public List<int> Type_IDs { get; set; }
         public string UF_CRM_GA_CID { get; set; }

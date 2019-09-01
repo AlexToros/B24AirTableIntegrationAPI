@@ -39,7 +39,6 @@ namespace B24AirTableIntegration.Lib.Helpers
 
         protected string Get(string EndPoint, Dictionary<string, string> parameters = null)
         {
-
             string url = $"{Path.Combine(RootUrl, EndPoint).Replace('\\','/').Trim('/')}?{GetTotalParamString(parameters)}".Trim('?');
             
             string result;

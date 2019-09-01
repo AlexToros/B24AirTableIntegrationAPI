@@ -1,4 +1,5 @@
-﻿using System;
+﻿using B24AirTableIntegration.Lib.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -53,6 +54,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public object UTM_CAMPAIGN { get; set; }
         public object UTM_CONTENT { get; set; }
         public object UTM_TERM { get; set; }
+        [Newtonsoft.Json.JsonConverter(typeof(ListOrBooleanConverter))]
         public List<int> UF_CRM_5BDAD1A7837D2 { get; set; }
         public string UF_CRM_5C028F68E4BB1 { get; set; }
         public string UF_CRM_5D0B79DBEBAB3 { get; set; }
@@ -71,7 +73,6 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public string UF_CRM_5D5FFD3C1A443 { get; set; }
         public List<PHONE> PHONE { get; set; }
     }
-
     public class CompanyResponse
     {
         [Newtonsoft.Json.JsonProperty("result")]

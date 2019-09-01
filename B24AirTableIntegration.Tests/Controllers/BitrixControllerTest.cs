@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using B24AirTableIntegration.Lib.AirTable;
 using B24AirTableIntegration.Lib.Bitrix24;
+using Newtonsoft.Json;
 
 namespace B24AirTableIntegration.Tests.Controllers
 {
@@ -66,8 +67,28 @@ namespace B24AirTableIntegration.Tests.Controllers
             BitrixClient Bitrix = BitrixClient.Instance;
             AirTableClient AirTable = AirTableClient.Instance;
 
-            var d = Bitrix.GetDeal("1465");
+            var d = Bitrix.GetDeal("1521");
+            string s = JsonConvert.SerializeObject(d);
+            s = s.Replace("[75]", "false");
+            var dd = JsonConvert.DeserializeObject<DealResponse>(s);
+            s = JsonConvert.SerializeObject(dd);
             AirTable.UpdateOrCreate(d);
+        }
+
+        [TestMethod]
+        public void TestListOrBoleanConverter()
+        {
+            string s = "{ \"result\": { \"UF_CRM_5BCF50BA94A18\": false, \"f\": 4 } }";
+
+            DealResponse r = JsonConvert.DeserializeObject<DealResponse>(s);
+            Assert.IsNull(r.Deal.Type_IDs);
+            s = JsonConvert.SerializeObject(r);
+            s = "{ \"result\": { \"UF_CRM_5BCF50BA94A18\": [ 0, 75 ] } }";
+             r = JsonConvert.DeserializeObject<DealResponse>(s);
+            Assert.AreEqual(r.Deal.Type_IDs[1], 75);
+
+            s = JsonConvert.SerializeObject(r);
+
         }
 
         [TestMethod]

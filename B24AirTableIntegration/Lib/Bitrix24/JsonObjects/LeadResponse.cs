@@ -46,6 +46,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public object UTM_CAMPAIGN { get; set; }
         public object UTM_CONTENT { get; set; }
         public object UTM_TERM { get; set; }
+        [Newtonsoft.Json.JsonConverter(typeof(ListOrBooleanConverter))]
         [Newtonsoft.Json.JsonProperty("UF_CRM_1540290799")]
         public List<int> Type_IDs { get; set; }
         public string UF_CRM_GA_CID { get; set; }

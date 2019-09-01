@@ -1,4 +1,5 @@
-﻿using System;
+﻿using B24AirTableIntegration.Lib.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -31,6 +32,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public object WORK_COMPANY { get; set; }
         public string WORK_POSITION { get; set; }
         public string WORK_PHONE { get; set; }
+        [Newtonsoft.Json.JsonConverter(typeof(ListOrBooleanConverter))]
         public List<int> UF_DEPARTMENT { get; set; }
         public object UF_INTERESTS { get; set; }
         public object UF_SKILLS { get; set; }
