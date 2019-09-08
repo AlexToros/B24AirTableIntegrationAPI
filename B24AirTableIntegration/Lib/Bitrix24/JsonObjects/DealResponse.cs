@@ -277,7 +277,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
             {
                 if (string.IsNullOrWhiteSpace(clientType))
                 {
-                    clientType = BitrixClient.Instance.GetLeadEnumUserFieldValue("UF_CRM_5D1C56FCCE1D7", ClientType_ID);
+                    clientType = BitrixClient.Instance.GetDealEnumUserFieldValue("UF_CRM_5D1C56FCCE1D7", ClientType_ID);
                 }
                 return clientType;
             }
