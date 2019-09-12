@@ -224,7 +224,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         {
             get
             {
-                int res = 0;
+                int res = -1;
                 int.TryParse(CountPeopleString, out res);
                 return res;
             }
@@ -269,7 +269,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         {
             get
             {
-                int res = 0;
+                int res = -1;
                 int.TryParse(LivingDaysString, out res);
                 return res;
             }
@@ -324,11 +324,11 @@ namespace B24AirTableIntegration.Lib.Bitrix24
                 record.fields.Add("Клиент", Lead.AirTableClientString);
             if (Lead.URL != null)
                 record.fields.Add("Клиент - Bitrix24", Lead.URL);
-            if (Lead.PeopleCount != 0)
+            if (Lead.PeopleCount != -1)
                 record.fields.Add("Кол-во человек", Lead.PeopleCount);
             if (Lead.CheckIn.HasValue && Lead.CheckIn.Value != DateTime.MinValue)
                 record.fields.Add("Заезд", Lead.CheckIn.Value.ToString("yyyy-MM-dd"));
-            if (Lead.LivingDaysCount != 0)
+            if (Lead.LivingDaysCount != -1)
                 record.fields.Add("Срок заселения / дней", Lead.LivingDaysCount);
             if (Lead.City != null)
                 record.fields.Add("Город", Lead.City);
