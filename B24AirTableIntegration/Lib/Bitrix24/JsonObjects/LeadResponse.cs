@@ -60,7 +60,7 @@ namespace B24AirTableIntegration.Lib.Bitrix24
         public string CountPeopleString { get; set; }
         [Newtonsoft.Json.JsonProperty("UF_CRM_1561385960")]
         public DateTime? CheckIn { get; set; }
-        [Newtonsoft.Json.JsonProperty("UF_CRM_1561385988")]
+        [Newtonsoft.Json.JsonProperty("UF_CRM_1566570513504")]
         public string LivingDaysString { get; set; }
         [Newtonsoft.Json.JsonProperty("UF_CRM_1562078925")]
         public string ClientType_ID { get; set; }
